@@ -1,0 +1,409 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* The Science of Color in UI Design Palette:
+     - 60% Dominant: Warm Natural Linen / Ivory Canvas (#FAF7F2)
+     - 30% Secondary: Forest Green (#2E7D5A) & Ocean Blue (#2D6CDF) & Earth Sand (#C8A27C)
+     - 10% Accent: Sunset Terracotta / Coral (#E85D3F / #FF684A)
+  */
+  --color-background: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-surface-subtle: #F6F2EB;
+  --color-surface-nested: #EFE8DE;
+  --color-surface-dark: #1E1D1B;
+  
+  --color-text-primary: #1F1E1B;
+  --color-text-secondary: #746F68;
+  --color-text-muted: #9C968D;
+  
+  /* Structural Warm Borders */
+  --color-border: #E8E2D8;
+  --color-border-subtle: rgba(116, 111, 104, 0.12);
+
+  /* The 4 Guide Palettes */
+  --color-earth: #C8A27C;
+  --color-earth-subtle: #F7F1E8;
+  --color-earth-text: #8C6237;
+
+  --color-ocean: #2D6CDF;
+  --color-ocean-subtle: #EDF4FC;
+  --color-ocean-text: #1B4FA8;
+
+  --color-sunset: #FF684A;
+  --color-sunset-action: #E85D3F;
+  --color-sunset-subtle: #FDF0ED;
+  --color-sunset-text: #C43D21;
+
+  --color-forest: #2E7D5A;
+  --color-forest-subtle: #EAF3EE;
+  --color-forest-text: #1E5E41;
+  
+  /* Semantic Muted Spot Pastels mapped to Guide */
+  --color-pastel-red: #FDF0ED;
+  --color-pastel-red-text: #C43D21;
+  --color-pastel-blue: #EDF4FC;
+  --color-pastel-blue-text: #1B4FA8;
+  --color-pastel-green: #EAF3EE;
+  --color-pastel-green-text: #1E5E41;
+  --color-pastel-yellow: #FBF4E4;
+  --color-pastel-yellow-text: #966B12;
+
+  /* Financial Indicators */
+  --color-positive: #2E7D5A;
+  --color-negative: #E85D3F;
+  --color-accent: #E85D3F;
+
+  /* Global Spacing & Typography */
+  --space-page-margin: 24px;
+  --space-card-padding: 24px;
+  --space-section-gap: 32px;
+  --line-height-body: 1.6;
+
+  /* Legacy aliases for compatibility */
+  --bg-main: #FAF7F2;
+  --bg-subtle: #F6F2EB;
+  --text-primary: #1F1E1B;
+  --text-secondary: #746F68;
+  --border-hairline: #E8E2D8;
+  --surface-card: #FFFFFF;
+  --surface-card-subtle: #F6F2EB;
+  --surface-card-nested: #EFE8DE;
+  --price-up: #2E7D5A;
+  --price-down: #E85D3F;
+}
+
+.dark {
+  /* Soft warm roasted espresso & charcoal neutrals (Not harsh pure black) */
+  --color-background: #181715;
+  --color-surface: #22201D;
+  --color-surface-subtle: #2A2824;
+  --color-surface-nested: #322F2A;
+  --color-surface-dark: #121110;
+  
+  --color-text-primary: #F5F3EF;
+  --color-text-secondary: #A6A096;
+  --color-text-muted: #7A746B;
+  
+  --color-border: #383530;
+  --color-border-subtle: rgba(255, 255, 255, 0.09);
+
+  --color-earth: #D9B591;
+  --color-earth-subtle: rgba(200, 162, 124, 0.18);
+  --color-earth-text: #E5C4A2;
+
+  --color-ocean: #4C8BF5;
+  --color-ocean-subtle: rgba(45, 108, 223, 0.22);
+  --color-ocean-text: #76A9FA;
+
+  --color-sunset: #FF7B60;
+  --color-sunset-action: #FF684A;
+  --color-sunset-subtle: rgba(255, 104, 74, 0.2);
+  --color-sunset-text: #FFA08A;
+
+  --color-forest: #3EA678;
+  --color-forest-subtle: rgba(46, 125, 90, 0.22);
+  --color-forest-text: #5EEAD4;
+
+  --color-pastel-red: rgba(232, 93, 63, 0.2);
+  --color-pastel-red-text: #FFA08A;
+  --color-pastel-blue: rgba(45, 108, 223, 0.2);
+  --color-pastel-blue-text: #76A9FA;
+  --color-pastel-green: rgba(46, 125, 90, 0.22);
+  --color-pastel-green-text: #4ADE80;
+  --color-pastel-yellow: rgba(200, 162, 124, 0.2);
+  --color-pastel-yellow-text: #FDE047;
+
+  --color-positive: #4ADE80;
+  --color-negative: #FF7B60;
+  --color-accent: #FF7B60;
+
+  --bg-main: #181715;
+  --bg-subtle: #2A2824;
+  --text-primary: #F5F3EF;
+  --text-secondary: #A6A096;
+  --border-hairline: #383530;
+  --surface-card: #22201D;
+  --surface-card-subtle: #2A2824;
+  --surface-card-nested: #322F2A;
+  --price-up: #4ADE80;
+  --price-down: #FF7B60;
+}
+
+html, body {
+  min-height: 100%;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: var(--line-height-body);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Hierarchy Classes */
+.font-editorial-serif {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.font-editorial-sans {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.font-editorial-mono {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-feature-settings: 'tnum';
+}
+
+/* Minimalist Keystroke Micro-UI */
+kbd, .kbd-editorial {
+  font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-surface-subtle);
+  padding: 2px 6px;
+  color: var(--color-text-secondary);
+}
+
+/* Standardized Flat Bento Card (1px solid #EAEAEA, crisp 10px-12px radius, ultra-diffuse shadow) */
+.card-farmer,
+.app-card {
+  background-color: var(--color-surface);
+  border-radius: 10px;
+  padding: var(--space-card-padding);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-farmer:hover,
+.app-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.app-card-nested {
+  background-color: var(--color-surface-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+/* Primary Editorial Call-to-Action (Solid #111111, white text, 6px radius, no drop shadow) */
+.app-btn-primary {
+  background-color: #111111;
+  color: #FFFFFF;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  padding: 0.625rem 1.25rem;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  cursor: pointer;
+  border: 1px solid #111111;
+}
+
+.dark .app-btn-primary {
+  background-color: #F0F0EE;
+  color: #111111;
+  border-color: #F0F0EE;
+}
+
+.app-btn-primary:hover {
+  background-color: #333333;
+}
+
+.dark .app-btn-primary:hover {
+  background-color: #E2E2E0;
+}
+
+.app-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.app-btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  font-weight: 500;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  padding: 0.625rem 1.25rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+}
+
+.app-btn-secondary:hover {
+  background-color: var(--color-surface-subtle);
+  border-color: #D4D4D4;
+}
+
+/* The Science of Color in UI Design: Core Palette Tag Badges (Pill-shaped, uppercase, tracked) */
+.tag-forest {
+  background-color: var(--color-forest-subtle);
+  color: var(--color-forest-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2.5px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-ocean {
+  background-color: var(--color-ocean-subtle);
+  color: var(--color-ocean-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2.5px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-sunset {
+  background-color: var(--color-sunset-subtle);
+  color: var(--color-sunset-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2.5px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-earth {
+  background-color: var(--color-earth-subtle);
+  color: var(--color-earth-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 2.5px 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Primary Call-to-Action with 10% Accent Highlighting */
+.app-btn-sunset {
+  background-color: var(--color-sunset-action);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(232, 93, 63, 0.2);
+}
+
+.app-btn-sunset:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 6px rgba(232, 93, 63, 0.3);
+}
+
+.app-btn-forest {
+  background-color: var(--color-forest);
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 0.875rem;
+  border-radius: 8px;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(46, 125, 90, 0.2);
+}
+
+.app-btn-forest:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 2px 6px rgba(46, 125, 90, 0.3);
+}
+
+/* Muted Pastel Tag Badges (Pill-shaped, uppercase, tracked) */
+.tag-pastel-green {
+  background-color: var(--color-pastel-green);
+  color: var(--color-pastel-green-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-pastel-red {
+  background-color: var(--color-pastel-red);
+  color: var(--color-pastel-red-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-pastel-blue {
+  background-color: var(--color-pastel-blue);
+  color: var(--color-pastel-blue-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-pastel-yellow {
+  background-color: var(--color-pastel-yellow);
+  color: var(--color-pastel-yellow-text);
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Subtle Warm Ambient Background Texture inspired by Earth & Sunset */
+.bg-subtle-warm-mesh {
+  background-image: radial-gradient(at 50% 0%, rgba(200, 162, 124, 0.14) 0px, transparent 65%),
+                    radial-gradient(at 100% 10%, rgba(255, 104, 74, 0.04) 0px, transparent 50%),
+                    radial-gradient(at 0% 20%, rgba(46, 125, 90, 0.04) 0px, transparent 50%);
+}
+
+.dark .bg-subtle-warm-mesh {
+  background-image: radial-gradient(at 50% 0%, rgba(200, 162, 124, 0.06) 0px, transparent 70%);
+}
+
+/* Safe area padding for mobile navigation */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 12px);
+}
+

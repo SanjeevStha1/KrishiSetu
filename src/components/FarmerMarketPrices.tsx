@@ -1,0 +1,868 @@
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  ArrowRight,
+  Truck,
+  MapPin,
+  Search,
+  Mic,
+  X,
+  Bell,
+  Sparkles,
+  Info,
+  Calendar,
+  Sprout,
+  ChevronDown,
+  ChevronUp,
+  BarChart3,
+  Layers,
+  Leaf,
+  Flame,
+  Wheat,
+  ArrowUpRight,
+  ArrowDownRight,
+  Check,
+  Award,
+} from 'lucide-react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  ReferenceDot,
+  ReferenceLine,
+  Tooltip,
+} from 'recharts';
+import { Commodity, OHLCV, UserProfile } from '../types/krishi';
+import { DISTRICT_LIST, generateHistoricalOHLCV, getRecommendationsForDistrict } from '../data/agriData';
+import { getCropImage } from '../data/nepalAgriImages';
+import { CropIllustration } from './CropIllustration';
+import { KrishiApi } from '../services/krishiApi';
+import { PriceAlertModal } from './PriceAlertModal';
+import { ActionableInsights } from './ActionableInsights';
+import { useLanguage } from '../context/LanguageContext';
+import { marketApi } from '../api/marketApi';
+import { AppTab } from './Header';
+
+interface FarmerMarketPricesProps {
+  commodities: Commodity[];
+  selectedDistrict: string;
+  setSelectedDistrict: (district: string) => void;
+  onNavigateToSell?: (cropId: string) => void;
+  initialSelectedCropId?: string;
+  userProfile?: UserProfile;
+  onNavigateTab?: (tab: AppTab, extra?: { commodityId?: string }) => void;
+}
+
+type SortOption = 'price_desc' | 'price_asc' | 'change_desc' | 'name_asc';
+type CategoryFilter = 'all' | 'vegetable' | 'fruit' | 'staple' | 'spices';
+
+export const FarmerMarketPrices: React.FC<FarmerMarketPricesProps> = ({
+  commodities,
+  selectedDistrict,
+  setSelectedDistrict,
+  onNavigateToSell,
+  initialSelectedCropId = 'tomato',
+  userProfile,
+  onNavigateTab,
+}) => {
+  const { t, language } = useLanguage();
+
+  // Primary Mode Switch: "My Data" vs "Market Data" (Defaulting to "My Data" for actionable farm guidance)
+  const [dashboardMode, setDashboardMode] = useState<'my_data' | 'market_data'>('my_data');
+
+  const [selectedCropId, setSelectedCropId] = useState<string>(initialSelectedCropId);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isAlertModalOpen, setIsAlertModalOpen] = useState<boolean>(false);
+  const [showVoiceRoadmapModal, setShowVoiceRoadmapModal] = useState<boolean>(false);
+
+  const currentDistrictObj = useMemo(() => {
+    return DISTRICT_LIST.find((d) => d.id.toLowerCase() === selectedDistrict.toLowerCase()) || DISTRICT_LIST[0];
+  }, [selectedDistrict]);
+
+  const activeCrop = useMemo(() => {
+    return commodities.find((c) => c.id === selectedCropId) || commodities[0];
+  }, [commodities, selectedCropId]);
+
+  // Recommended Crop for Highest Yield for that area
+  const highestYieldRecommendation = useMemo(() => {
+    const recs = getRecommendationsForDistrict(selectedDistrict.toLowerCase());
+    const topRec = recs[0];
+    if (!topRec) return null;
+    const yieldMtPerHa =
+      topRec.crop === 'cabbage'
+        ? '28–32 MT/ha'
+        : topRec.crop === 'potato'
+        ? '22–26 MT/ha'
+        : topRec.crop === 'tomato'
+        ? '20–25 MT/ha'
+        : '18–22 MT/ha';
+    return {
+      ...topRec,
+      yieldMtPerHa,
+    };
+  }, [selectedDistrict]);
+
+  // Real price history from backend
+  const [priceHistory, setPriceHistory] = useState<Array<{ date: string; price: number }>>([]);
+
+  useEffect(() => {
+    if (!activeCrop?.id) return;
+    let cancelled = false;
+    marketApi.getPriceHistory(activeCrop.id, 14)
+      .then((res) => {
+        if (!cancelled && res?.history && res.history.length > 0) {
+          setPriceHistory(res.history);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [activeCrop?.id]);
+
+  // 14-Day Price Trajectory (Past 7 Days + 7-Day Forecast) - Matches My Farm Data
+  const chartData14Days = useMemo(() => {
+    if (!activeCrop) {
+      return {
+        points: [],
+        peakPoint: { dayKey: '+2d', dayLabel: '+2d', dateStr: '', price: 50, actualPrice: null, predictedPrice: 50, type: 'predicted' as const, peakDayIdx: 2, peakPrice: 50, diffVsCurrent: 0 },
+        minPrice: 0,
+        maxPrice: 100,
+        currentPrice: 50,
+        yesterdayPrice: 50,
+      };
+    }
+
+    const currentPrice = Math.round(activeCrop.currentPrice);
+    const yesterdayPrice = Math.round(activeCrop.yesterdayPrice ?? activeCrop.previousClose ?? currentPrice);
+    const forecast7Day = Math.round(activeCrop.forecast7Day ?? (currentPrice * (activeCrop.changePct >= 0 ? 1.05 : 0.96)));
+    const isPerishable = activeCrop.category === 'perishable';
+
+    const points: Array<{
+      dayKey: string;
+      dayLabel: string;
+      dateStr: string;
+      price: number;
+      actualPrice: number | null;
+      predictedPrice: number | null;
+      type: 'actual' | 'today' | 'predicted';
+    }> = [];
+
+    const now = new Date();
+    const dayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const dayNamesNe = ['आइत', 'सोम', 'मंगल', 'बुध', 'बिही', 'शुक्र', 'शनि'];
+    const isNe = language === 'ne';
+
+    // Map history records by date
+    const historyMap = new Map<string, number>();
+    for (const h of priceHistory) {
+      if (h && h.date && typeof h.price === 'number') {
+        historyMap.set(h.date, Math.round(h.price));
+      }
+    }
+
+    // 1. Past 7 days (day -7 to day -1)
+    for (let i = 7; i >= 1; i--) {
+      const pastDate = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const dateKey = pastDate.toISOString().split('T')[0];
+      const dayName = isNe ? dayNamesNe[pastDate.getDay()] : dayNamesEn[pastDate.getDay()];
+
+      let computedPrice: number;
+      if (i === 1) {
+        // Day -1 is explicitly yesterday's old rate!
+        computedPrice = yesterdayPrice;
+      } else if (historyMap.has(dateKey)) {
+        computedPrice = historyMap.get(dateKey)!;
+      } else {
+        // Smooth backward curve leading to yesterday's price
+        const step = (7 - i) / 6;
+        const anchor = Math.round(yesterdayPrice * (0.94 + Math.sin(i * 0.5) * 0.04));
+        computedPrice = Math.round(anchor * (1 - step) + yesterdayPrice * step);
+      }
+
+      points.push({
+        dayKey: `-${i}d`,
+        dayLabel: i === 1 ? (isNe ? `हिजो (${dayName})` : `Yesterday (${dayName})`) : `-${i}d (${dayName})`,
+        dateStr: pastDate.toLocaleDateString(isNe ? 'ne-NP' : 'en-US', { month: 'short', day: 'numeric' }),
+        price: computedPrice,
+        actualPrice: computedPrice,
+        predictedPrice: null,
+        type: 'actual',
+      });
+    }
+
+    // 2. Today (Day 0) - Bridge point
+    const todayName = isNe ? dayNamesNe[now.getDay()] : dayNamesEn[now.getDay()];
+    points.push({
+      dayKey: 'Today',
+      dayLabel: isNe ? `आज (${todayName})` : `Today (${todayName})`,
+      dateStr: now.toLocaleDateString(isNe ? 'ne-NP' : 'en-US', { month: 'short', day: 'numeric' }),
+      price: currentPrice,
+      actualPrice: currentPrice,
+      predictedPrice: currentPrice,
+      type: 'today',
+    });
+
+    // 3. Next 7 days (+1d to +7d prediction)
+    let predictedPeakPrice = currentPrice;
+    let peakDayIdx = 0;
+
+    for (let j = 1; j <= 7; j++) {
+      const futureDate = new Date(now.getTime() + j * 24 * 60 * 60 * 1000);
+      const dayName = isNe ? dayNamesNe[futureDate.getDay()] : dayNamesEn[futureDate.getDay()];
+
+      let predPrice: number;
+      const progress = j / 7;
+      if (isPerishable && currentPrice >= 50) {
+        if (j <= 2) {
+          predPrice = Math.round(currentPrice + j * 3.5);
+        } else {
+          predPrice = Math.round(currentPrice + 7 - (j - 2) * 4);
+        }
+      } else if (activeCrop.changePct <= -3) {
+        if (j <= 4) {
+          predPrice = Math.round(currentPrice + j * 2.2);
+        } else {
+          predPrice = Math.round(currentPrice + 9 + (j - 4) * 0.8);
+        }
+      } else {
+        const targetDiff = forecast7Day - currentPrice;
+        predPrice = Math.round(currentPrice + targetDiff * progress + Math.sin(progress * Math.PI) * 2.5);
+      }
+
+      predPrice = Math.max(10, predPrice);
+
+      if (predPrice > predictedPeakPrice) {
+        predictedPeakPrice = predPrice;
+        peakDayIdx = j;
+      }
+
+      points.push({
+        dayKey: `+${j}d`,
+        dayLabel: `+${j}d (${dayName})`,
+        dateStr: futureDate.toLocaleDateString(isNe ? 'ne-NP' : 'en-US', { month: 'short', day: 'numeric' }),
+        price: predPrice,
+        actualPrice: null,
+        predictedPrice: predPrice,
+        type: 'predicted',
+      });
+    }
+
+    const allPrices = points.map((p) => p.price);
+    const minPrice = Math.max(0, Math.min(...allPrices) - 4);
+    const maxPrice = Math.max(...allPrices) + 4;
+    const peakPoint = points.find((p) => p.dayKey === `+${peakDayIdx}d`) || points[7];
+
+    return {
+      points,
+      peakPoint: {
+        ...peakPoint,
+        peakDayIdx,
+        peakPrice: predictedPeakPrice,
+        diffVsCurrent: predictedPeakPrice - currentPrice,
+      },
+      minPrice,
+      maxPrice,
+      currentPrice,
+      yesterdayPrice,
+    };
+  }, [activeCrop, priceHistory, language]);
+
+  // Best Selling Crops (Crops Sold in that Area)
+  const areaBestSellingCrops = useMemo(() => {
+    const districtKey = selectedDistrict.toLowerCase();
+
+    const areaTurnoverProfiles: Record<string, Array<{ id: string; volumeMt: string; highlightEn: string; highlightNe: string }>> = {
+      chitwan: [
+        { id: 'tomato', volumeMt: '18.5 MT/day', highlightEn: 'High Daily Turnover', highlightNe: 'दैनिक उच्च मन्डी माग' },
+        { id: 'potato', volumeMt: '24.2 MT/day', highlightEn: 'Everyday Household Staple', highlightNe: 'नियमित मुख्य भान्सा बाली' },
+        { id: 'cabbage', volumeMt: '21.0 MT/day', highlightEn: 'Highway Wholesale Bulk', highlightNe: 'राजमार्ग थोक ढुवानी' },
+        { id: 'cauliflower', volumeMt: '15.4 MT/day', highlightEn: 'Peak Seasonal Demand', highlightNe: 'मौसमी उच्च माग' },
+        { id: 'capsicum', volumeMt: '8.2 MT/day', highlightEn: 'Hotel Corridor Demand', highlightNe: 'होटल कोरिडोर बिक्री' },
+        { id: 'onion', volumeMt: '19.0 MT/day', highlightEn: 'Continuous Daily Supply', highlightNe: 'नियमित दैनिक आपूर्ति' },
+      ],
+      kathmandu: [
+        { id: 'tomato', volumeMt: '42.0 MT/day', highlightEn: 'Valley Core Daily Demand', highlightNe: 'उपत्यका मुख्य खपत' },
+        { id: 'potato', volumeMt: '65.0 MT/day', highlightEn: 'Kalimati Highest Influx', highlightNe: 'कालीमाटी सर्वाधिक बिक्री' },
+        { id: 'onion', volumeMt: '38.0 MT/day', highlightEn: 'Heavy Kitchen Consumption', highlightNe: 'दैनिक भान्सा माग' },
+        { id: 'cauliflower', volumeMt: '28.0 MT/day', highlightEn: 'Morning Mandi Absorption', highlightNe: 'बिहानी थोक बिक्री' },
+        { id: 'cabbage', volumeMt: '26.0 MT/day', highlightEn: 'Bulk Catering Flow', highlightNe: 'थोक क्याटरिङ खपत' },
+        { id: 'carrot', volumeMt: '14.0 MT/day', highlightEn: 'Fast Retail Turnover', highlightNe: 'द्रुत खुद्रा बिक्री' },
+      ],
+      dhading: [
+        { id: 'cauliflower', volumeMt: '22.0 MT/day', highlightEn: 'Major Valley Feeder', highlightNe: 'राजधानीको मुख्य आपूर्ति' },
+        { id: 'cabbage', volumeMt: '25.0 MT/day', highlightEn: 'Highway Freight Transit', highlightNe: 'ट्रक ढुवानी उच्च' },
+        { id: 'tomato', volumeMt: '16.5 MT/day', highlightEn: 'Tunnel Harvest Favourite', highlightNe: 'टनेल उत्पादन' },
+        { id: 'capsicum', volumeMt: '9.0 MT/day', highlightEn: 'Commercial High Cash', highlightNe: 'उच्च मूल्य नगदे बाली' },
+        { id: 'bitter_gourd', volumeMt: '11.0 MT/day', highlightEn: 'River Basin Harvest', highlightNe: 'बेँसीको उत्पादन' },
+        { id: 'potato', volumeMt: '18.0 MT/day', highlightEn: 'Terrace Farm Staple', highlightNe: 'पहाडी मुख्य बाली' },
+      ],
+      kavre: [
+        { id: 'tomato', volumeMt: '26.0 MT/day', highlightEn: 'Panchkhal Tunnel Tomato', highlightNe: 'पाँचखाल टनेल गोलभेडा' },
+        { id: 'potato', volumeMt: '32.0 MT/day', highlightEn: 'Red Potato Core Trade', highlightNe: 'रातो आलु मुख्य केन्द्र' },
+        { id: 'cauliflower', volumeMt: '18.0 MT/day', highlightEn: 'Valley Morning Supply', highlightNe: 'काठमाडौँ बिहानी आपूर्ति' },
+        { id: 'cabbage', volumeMt: '16.0 MT/day', highlightEn: 'Highway Direct Supply', highlightNe: 'राजमार्ग सिधा आपूर्ति' },
+        { id: 'green_peas', volumeMt: '12.0 MT/day', highlightEn: 'Seasonal High Demand', highlightNe: 'नगदे मौसमी बाली' },
+        { id: 'onion', volumeMt: '14.0 MT/day', highlightEn: 'Local Trading Hub', highlightNe: 'स्थानीय व्यापार' },
+      ],
+    };
+
+    const currentProfile = areaTurnoverProfiles[districtKey] || [
+      { id: 'tomato', volumeMt: '16.0 MT/day', highlightEn: 'High Daily Mandi Turnover', highlightNe: 'दैनिक उच्च मन्डी माग' },
+      { id: 'potato', volumeMt: '22.0 MT/day', highlightEn: 'Everyday Household Staple', highlightNe: 'नियमित मुख्य भान्सा बाली' },
+      { id: 'cabbage', volumeMt: '18.0 MT/day', highlightEn: 'High Volume Transit', highlightNe: 'थोक ढुवानी उच्च' },
+      { id: 'cauliflower', volumeMt: '14.0 MT/day', highlightEn: 'Peak Seasonal Demand', highlightNe: 'मौसमी उच्च माग' },
+      { id: 'onion', volumeMt: '17.0 MT/day', highlightEn: 'Continuous Daily Supply', highlightNe: 'नियमित दैनिक आपूर्ति' },
+      { id: 'capsicum', volumeMt: '7.5 MT/day', highlightEn: 'High Value Commercial', highlightNe: 'उच्च मूल्य नगदे बाली' },
+    ];
+
+    let items = currentProfile
+      .map((p) => {
+        const comm = commodities.find((c) => c.id === p.id);
+        if (!comm) return null;
+        return {
+          ...comm,
+          volumeMt: p.volumeMt,
+          highlightEn: p.highlightEn,
+          highlightNe: p.highlightNe,
+        };
+      })
+      .filter(Boolean) as Array<Commodity & { volumeMt: string; highlightEn: string; highlightNe: string }>;
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      const matches = commodities.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.nepaliName && c.nepaliName.includes(q)) ||
+          c.id.toLowerCase().includes(q)
+      );
+      items = matches.map((c) => {
+        const existing = items.find((it) => it.id === c.id);
+        return {
+          ...c,
+          volumeMt: existing ? existing.volumeMt : '~10 MT/day',
+          highlightEn: existing ? existing.highlightEn : 'Area Mandi Trade',
+          highlightNe: existing ? existing.highlightNe : 'क्षेत्रीय मन्डी व्यापार',
+        };
+      });
+    }
+
+    return items;
+  }, [selectedDistrict, commodities, searchQuery]);
+
+  // Plain-language summary
+  const krishiMitraSummary = useMemo(() => {
+    if (!activeCrop) return '';
+    const isNe = language === 'ne';
+    const currentPriceVal = Math.round(activeCrop.currentPrice);
+    const peak = chartData14Days.peakPoint;
+
+    if (isNe) {
+      return `${activeCrop.nepaliName || activeCrop.name} को हालको दर रु ${currentPriceVal}/केजी छ। आगामी ${peak.peakDayIdx || 2} दिनमा रु ${peak.peakPrice}/केजी सम्म पुग्ने प्रक्षेपण गरिएको छ।`;
+    }
+    return `${activeCrop.name} is currently trading at Rs ${currentPriceVal}/kg. Statistical model projects a peak of Rs ${peak.peakPrice}/kg in ${peak.peakDayIdx || 2} days.`;
+  }, [activeCrop, chartData14Days, language]);
+
+  const todayFormattedDate = useMemo(() => {
+    const now = new Date();
+    return now.toLocaleDateString(language === 'ne' ? 'ne-NP' : 'en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+  }, [language]);
+
+  const isNe = language === 'ne';
+
+  return (
+    <div className="relative w-full max-w-7xl mx-auto space-y-5 pb-6 font-editorial-sans text-[#1F1E1B] dark:text-[#F5F3EF]">
+      <ActionableInsights
+        commodities={commodities}
+        selectedDistrict={selectedDistrict}
+        setSelectedDistrict={setSelectedDistrict}
+        userProfile={userProfile}
+        activeCropId={selectedCropId}
+        setActiveCropId={setSelectedCropId}
+        onNavigateTab={onNavigateTab}
+        onNavigateToSell={onNavigateToSell}
+        dashboardMode={dashboardMode}
+        setDashboardMode={setDashboardMode}
+        marketDataView={
+          <div className="space-y-5">
+            {/* Top Context & Search Bar */}
+            <div className="app-card p-4 sm:p-5 space-y-3.5 border border-[#E8E2D8] dark:border-[#383530] bg-white dark:bg-[#22201D]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="tag-pastel-blue">
+                      {isNe ? "कालिमाटी तथा क्षेत्रीय मन्डी" : "Kalimati & Regional Mandi"}
+                    </span>
+                    <span className="text-[11px] font-editorial-mono text-[#746F68] dark:text-[#A6A096]">
+                      {todayFormattedDate}
+                    </span>
+                  </div>
+                  <h1 className="font-editorial-serif text-lg sm:text-xl font-bold text-[#1F1E1B] dark:text-[#F5F3EF] tracking-tight">
+                    {isNe
+                      ? `${currentDistrictObj.name} क्षेत्र बजार दर तथा प्रक्षेपण`
+                      : `${currentDistrictObj.name} Regional Market Rates & Trends`}
+                  </h1>
+                </div>
+
+                {/* District Selector */}
+                <div className="flex items-center gap-2 bg-[#FAF7F2] dark:bg-[#262421] px-3 py-1.5 rounded-lg border border-[#E8E2D8] dark:border-[#383530] text-xs self-start sm:self-auto">
+                  <MapPin className="w-3.5 h-3.5 text-[#C8A27C] dark:text-[#D9B591]" />
+                  <span className="text-[#746F68] dark:text-[#A6A096]">{t("header.marketSelector", "Market:")}</span>
+                  <select
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.target.value)}
+                    className="bg-transparent font-medium text-[#1F1E1B] dark:text-[#F5F3EF] focus:outline-none cursor-pointer pr-1"
+                  >
+                    {DISTRICT_LIST.map((dist) => (
+                      <option key={dist.id} value={dist.id} className="dark:bg-[#1E1D1B] dark:text-[#F5F3EF]">
+                        {dist.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Search Box */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-[#746F68] dark:text-[#A6A096] absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t(
+                    "market.searchPlaceholder",
+                    "Search commodities (e.g. Tomato, Potato, गोलभेडा, आलु, काउली)..."
+                  )}
+                  className="w-full bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] focus:border-[#2D6CDF] dark:focus:border-[#76A9FA] rounded-lg pl-10 pr-20 py-2 text-xs sm:text-sm text-[#1F1E1B] dark:text-[#F5F3EF] placeholder:text-[#746F68] focus:outline-none transition"
+                />
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="p-1 text-[#746F68] hover:text-[#1F1E1B] dark:hover:text-[#F5F3EF] cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setShowVoiceRoadmapModal(true)}
+                    className="p-1 text-[#746F68] hover:text-[#1F1E1B] dark:hover:text-[#F5F3EF] cursor-pointer"
+                    title="Nepali Voice Search"
+                  >
+                    <Mic className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 1. Recommended Product for Highest Yield for that Area */}
+            {highestYieldRecommendation && (
+              <div className="app-card p-4 sm:p-5 border border-[#E8E2D8] dark:border-[#383530] bg-white dark:bg-[#22201D] shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#E8E2D8] dark:border-[#383530]">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-[#EAF3EE] text-[#1E5E41] dark:bg-[#1E3327] dark:text-[#4ADE80]">
+                      <Award className="w-3.5 h-3.5" />
+                      <span>{isNe ? "उच्च उत्पादन सिफारिस" : "Recommended Highest Yield"}</span>
+                    </span>
+                    <span className="text-xs text-[#746F68] dark:text-[#A6A096]">
+                      · {currentDistrictObj.name} {isNe ? "क्षेत्र" : "Area"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-semibold text-[#2E7D5A] dark:text-[#4ADE80]">
+                    {isNe ? "९१% माटो तथा मौसम अनुकूलता" : "91% Agro-Climatic Fit"}
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] p-1.5 flex items-center justify-center shrink-0">
+                      <CropIllustration crop={highestYieldRecommendation.crop} size="full" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-base text-[#1F1E1B] dark:text-[#F5F3EF]">
+                          {isNe ? highestYieldRecommendation.nepaliName : highestYieldRecommendation.cropDisplayName}
+                        </h4>
+                        <span className="text-xs text-[#746F68] dark:text-[#A6A096]">
+                          ({highestYieldRecommendation.cropDisplayName})
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#746F68] dark:text-[#A6A096] mt-0.5 line-clamp-1">
+                        {highestYieldRecommendation.marketOutlook}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 shrink-0">
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-[#746F68] dark:text-[#A6A096] block">
+                        {isNe ? "अपेक्षित उत्पादन" : "Expected Yield"}
+                      </span>
+                      <span className="font-editorial-mono font-bold text-sm text-[#1F1E1B] dark:text-[#F5F3EF]">
+                        {highestYieldRecommendation.yieldMtPerHa}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] uppercase font-bold text-[#746F68] dark:text-[#A6A096] block">
+                        {isNe ? "बजार दर" : "Est. Mandi Rate"}
+                      </span>
+                      <span className="font-editorial-mono font-bold text-sm text-[#2E7D5A] dark:text-[#4ADE80]">
+                        Rs {highestYieldRecommendation.expectedPricePerKg}/kg
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCropId(highestYieldRecommendation.crop)}
+                      className="px-3 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#F3ECE0] dark:bg-[#2A2824] dark:hover:bg-[#33302B] border border-[#E8E2D8] dark:border-[#383530] text-xs font-bold text-[#1F1E1B] dark:text-[#F5F3EF] transition cursor-pointer"
+                    >
+                      {isNe ? "बाली हेर्नुहोस्" : "Select Crop"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. 14-Day Price Graph (Past 7 Days vs Predicted 7 Days) - Same as My Farm Data */}
+            {activeCrop && (
+              <div className="app-card p-4 sm:p-5 border border-[#E8E2D8] dark:border-[#383530] bg-white dark:bg-[#22201D] shadow-xs space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E8E2D8] dark:border-[#383530]">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] p-1 flex items-center justify-center shrink-0">
+                      <CropIllustration crop={activeCrop.id} size="full" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-baseline gap-2.5">
+                        <h3 className="font-bold text-base text-[#1F1E1B] dark:text-[#F5F3EF]">
+                          {isNe ? activeCrop.nepaliName : activeCrop.name}
+                        </h3>
+                        <span className="font-editorial-mono font-bold text-sm text-[#2E7D5A] dark:text-[#4ADE80]">
+                          Rs {chartData14Days.currentPrice}/kg {isNe ? "आजको नयाँ दर" : "today (new)"}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 mt-1">
+                        <span className="text-xs text-[#746F68] dark:text-[#A6A096]">
+                          {isNe ? "हिजोको दर" : "Yesterday"}: <strong className="font-editorial-mono text-[#1F1E1B] dark:text-[#F5F3EF]">Rs {chartData14Days.yesterdayPrice}/kg</strong>
+                        </span>
+                        {chartData14Days.currentPrice !== chartData14Days.yesterdayPrice && (
+                          <span
+                            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-bold font-editorial-mono ${
+                              chartData14Days.currentPrice > chartData14Days.yesterdayPrice
+                                ? "bg-[#EAF3EE] text-[#1E5E41] dark:bg-[#1E3327] dark:text-[#4ADE80]"
+                                : "bg-[#FDF2F2] text-[#DC2626] dark:bg-[#381E1E] dark:text-[#F87171]"
+                            }`}
+                          >
+                            {chartData14Days.currentPrice > chartData14Days.yesterdayPrice ? "+" : ""}
+                            Rs {chartData14Days.currentPrice - chartData14Days.yesterdayPrice} ({activeCrop.changePct >= 0 ? "+" : ""}{activeCrop.changePct}%)
+                          </span>
+                        )}
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-bold bg-[#EAF3EE] text-[#1E5E41] dark:bg-[#1E3327] dark:text-[#4ADE80]">
+                          {isNe ? "उच्चतम प्रक्षेपण" : "Peak"}: Rs {chartData14Days.peakPoint.peakPrice}/kg (+Rs {chartData14Days.peakPoint.diffVsCurrent} in {chartData14Days.peakPoint.peakDayIdx}d)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Legend & Action Buttons */}
+                  <div className="flex items-center gap-3 self-end sm:self-auto">
+                    <div className="flex items-center gap-2.5 text-[11px] font-medium text-[#746F68] dark:text-[#A6A096]">
+                      <span className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#1F1E1B] dark:bg-[#F5F3EF] inline-block" />
+                        <span>{isNe ? "विगत ७ दिन" : "Past 7 Days"}</span>
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#2D6CDF] inline-block" />
+                        <span>{isNe ? "आगामी ७ दिन (प्रक्षेपण)" : "Next 7 Days (Forecast)"}</span>
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setIsAlertModalOpen(true)}
+                      className="px-2.5 py-1 rounded-lg border border-[#E8E2D8] dark:border-[#383530] bg-[#FAF7F2] hover:bg-[#F3ECE0] dark:bg-[#2A2824] dark:hover:bg-[#33302B] text-xs font-semibold text-[#1F1E1B] dark:text-[#F5F3EF] flex items-center gap-1.5 transition cursor-pointer"
+                    >
+                      <Bell className="w-3.5 h-3.5 text-[#C8A27C] dark:text-[#D9B591]" />
+                      <span>{isNe ? "सूचना" : "Alert"}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* The 14-Day Trajectory Line Chart */}
+                <div className="h-60 sm:h-72 w-full pt-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData14Days.points} margin={{ top: 12, right: 16, left: -20, bottom: 4 }}>
+                      <XAxis
+                        dataKey="dayLabel"
+                        tick={{ fill: "#8C887B", fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={{ stroke: "#E8E2D8" }}
+                      />
+                      <YAxis
+                        domain={[chartData14Days.minPrice, chartData14Days.maxPrice]}
+                        tick={{ fill: "#8C887B", fontSize: 11 }}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(v) => `Rs ${v}`}
+                      />
+                      <Tooltip
+                        content={({ active, payload }) => {
+                          if (active && payload && payload.length) {
+                            const d = payload[0].payload;
+                            const isPredicted = d.type === "predicted";
+                            const isToday = d.type === "today";
+                            const isYesterday = d.dayKey === "-1d";
+                            const priceDiff = d.price - chartData14Days.yesterdayPrice;
+                            return (
+                              <div className="bg-white dark:bg-[#1E1D1B] border border-[#E8E2D8] dark:border-[#383530] p-2.5 rounded-lg shadow-sm text-xs space-y-1.5">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="font-bold text-[#1F1E1B] dark:text-[#F5F3EF]">
+                                    {d.dayLabel} ({d.dateStr})
+                                  </span>
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                                      isToday
+                                        ? "bg-[#EAF3EE] text-[#1E5E41] dark:bg-[#1E3327] dark:text-[#4ADE80]"
+                                        : isYesterday
+                                        ? "bg-[#FEF3C7] text-[#92400E] dark:bg-[#362712] dark:text-[#FBBF24]"
+                                        : isPredicted
+                                        ? "bg-[#EBF2FC] text-[#2D6CDF] dark:bg-[#1E2E4A] dark:text-[#76A9FA]"
+                                        : "bg-[#FAF7F2] text-[#746F68] dark:bg-[#262421] dark:text-[#A6A096]"
+                                    }`}
+                                  >
+                                    {isToday
+                                      ? (isNe ? "आजको नयाँ दर" : "New Rate (Today)")
+                                      : isYesterday
+                                      ? (isNe ? "हिजोको पुरानो दर" : "Old Rate (Yesterday)")
+                                      : isPredicted
+                                      ? (isNe ? "प्रक्षेपण" : "Forecast")
+                                      : (isNe ? "अभिलेख दर" : "Recorded")}
+                                  </span>
+                                </div>
+                                <div className="flex items-baseline gap-2">
+                                  <span className="font-editorial-mono font-bold text-base text-[#1F1E1B] dark:text-[#F5F3EF]">
+                                    Rs {d.price}/kg
+                                  </span>
+                                  {isToday && chartData14Days.currentPrice !== chartData14Days.yesterdayPrice && (
+                                    <span className="font-editorial-mono text-xs font-bold text-[#2E7D5A] dark:text-[#4ADE80]">
+                                      {priceDiff >= 0 ? "+" : ""}Rs {priceDiff} vs हिजो ({activeCrop.changePct >= 0 ? "+" : ""}{activeCrop.changePct}%)
+                                    </span>
+                                  )}
+                                  {isYesterday && (
+                                    <span className="text-[11px] text-[#92400E] dark:text-[#FBBF24]">
+                                      {isNe ? "कालीमाटी अघिल्लो दर" : "Previous Mandi Rate"}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+
+                      {/* Bridge Reference Line for Today */}
+                      <ReferenceLine
+                        x={chartData14Days.points[7]?.dayLabel}
+                        stroke="#8C887B"
+                        strokeDasharray="2 2"
+                        label={{
+                          value: isNe ? "आज" : "Today",
+                          position: "top",
+                          fill: "#8C887B",
+                          fontSize: 10,
+                          fontWeight: "bold",
+                        }}
+                      />
+
+                      {/* Dot on Yesterday (Old Rate) */}
+                      {chartData14Days.points[6] && (
+                        <ReferenceDot
+                          x={chartData14Days.points[6]?.dayLabel}
+                          y={chartData14Days.yesterdayPrice}
+                          r={5}
+                          fill="#F59E0B"
+                          stroke="#FFFFFF"
+                          strokeWidth={2}
+                        />
+                      )}
+
+                      {/* Dot on Today (New Rate) */}
+                      <ReferenceDot
+                        x={chartData14Days.points[7]?.dayLabel}
+                        y={chartData14Days.currentPrice}
+                        r={6}
+                        fill="#10B981"
+                        stroke="#FFFFFF"
+                        strokeWidth={2}
+                      />
+
+                      {/* Dot on Forecast Peak */}
+                      {chartData14Days.peakPoint.peakDayIdx > 0 && (
+                        <ReferenceDot
+                          x={chartData14Days.peakPoint.dayLabel}
+                          y={chartData14Days.peakPoint.peakPrice}
+                          r={5}
+                          fill="#2D6CDF"
+                          stroke="#FFFFFF"
+                          strokeWidth={2}
+                        />
+                      )}
+
+                      {/* 1. Actual Solid Line (Past 7 Days + Today) */}
+                      <Line
+                        type="monotone"
+                        dataKey="actualPrice"
+                        stroke="#2B2A27"
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: "#2B2A27" }}
+                        activeDot={{ r: 5, fill: "#2B2A27", stroke: "#FFFFFF", strokeWidth: 2 }}
+                        connectNulls={false}
+                      />
+
+                      {/* 2. Predicted Dashed Line (Today + Next 7 Days) */}
+                      <Line
+                        type="monotone"
+                        dataKey="predictedPrice"
+                        stroke="#2D6CDF"
+                        strokeWidth={2.5}
+                        strokeDasharray="4 4"
+                        dot={{ r: 3, fill: "#2D6CDF" }}
+                        activeDot={{ r: 5, fill: "#2D6CDF", stroke: "#FFFFFF", strokeWidth: 2 }}
+                        connectNulls={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Krishi Mitra Grounded Plain-Language Advisory */}
+                <div className="p-3 rounded-lg bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] flex items-start gap-2.5 text-xs">
+                  <Sparkles className="w-4 h-4 text-[#C8A27C] dark:text-[#D9B591] shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold text-[#1F1E1B] dark:text-[#F5F3EF] block">
+                      {t("market.krishiMitraAdvice", "Krishi Mitra Advice:")}
+                    </span>
+                    <p className="text-[#746F68] dark:text-[#A6A096] mt-0.5 leading-relaxed">
+                      {krishiMitraSummary}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Best Selling Crops (Crops Sold in that Area) */}
+            <div className="app-card p-4 sm:p-5 border border-[#E8E2D8] dark:border-[#383530] bg-white dark:bg-[#22201D] shadow-xs space-y-3.5">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#E8E2D8] dark:border-[#383530]">
+                <div>
+                  <h3 className="font-bold text-base text-[#1F1E1B] dark:text-[#F5F3EF]">
+                    {isNe
+                      ? `${currentDistrictObj.name} क्षेत्रमा धेरै बिक्री हुने बालीहरू`
+                      : `Best Selling Crops in ${currentDistrictObj.name}`}
+                  </h3>
+                  <p className="text-xs text-[#746F68] dark:text-[#A6A096] mt-0.5">
+                    {isNe
+                      ? "यस क्षेत्रको मन्डी कोरिडोरमा सक्रिय रूपमा बिक्री हुने मुख्य बालीहरू"
+                      : "High-turnover commodities actively sold in this regional market corridor"}
+                  </p>
+                </div>
+                <span className="text-xs text-[#746F68] dark:text-[#A6A096]">
+                  {areaBestSellingCrops.length} {isNe ? "बालीहरू" : "crops available"}
+                </span>
+              </div>
+
+              {/* Best Selling Crops Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {areaBestSellingCrops.map((item) => {
+                  const isSelected = item.id === selectedCropId;
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedCropId(item.id)}
+                      className={`p-3.5 rounded-xl border transition cursor-pointer flex items-center justify-between gap-3 ${
+                        isSelected
+                          ? "bg-[#FAF7F2] dark:bg-[#2A2824] border-[#2E7D5A] ring-1 ring-[#2E7D5A]"
+                          : "bg-white dark:bg-[#22201D] hover:bg-[#FAF7F2] dark:hover:bg-[#262421] border-[#E8E2D8] dark:border-[#383530]"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] p-1 flex items-center justify-center shrink-0">
+                          <CropIllustration crop={item.id} size="full" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-sm text-[#1F1E1B] dark:text-[#F5F3EF]">
+                            {isNe ? item.nepaliName : item.name}
+                          </h4>
+                          <span className="text-[11px] text-[#746F68] dark:text-[#A6A096] block">
+                            {item.volumeMt} · {isNe ? item.highlightNe : item.highlightEn}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <div className="font-editorial-mono font-bold text-sm text-[#1F1E1B] dark:text-[#F5F3EF]">
+                          Rs {item.currentPrice}/kg
+                        </div>
+                        <span
+                          className={`text-[10px] font-editorial-mono font-bold px-1.5 py-0.5 rounded inline-block mt-0.5 ${
+                            item.changePct >= 0
+                              ? "bg-[#EAF3EE] text-[#1E5E41] dark:bg-[#1E3327] dark:text-[#4ADE80]"
+                              : "bg-[#FDEDE9] text-[#C4381C] dark:bg-[#3B1E19] dark:text-[#FF8A73]"
+                          }`}
+                        >
+                          {item.changePct >= 0 ? "+" : ""}{item.changePct}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        }
+      />
+
+      {/* Price Alert Modal */}
+      {activeCrop && (
+        <PriceAlertModal
+          isOpen={isAlertModalOpen}
+          onClose={() => setIsAlertModalOpen(false)}
+          commodity={activeCrop}
+          userDistrict={selectedDistrict}
+        />
+      )}
+
+      {/* Voice Search Roadmap Modal */}
+      {showVoiceRoadmapModal && (
+        <div className="fixed inset-0 z-50 bg-[#111111]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#FFFFFF] dark:bg-[#1E1E1E] rounded-lg p-5 max-w-sm w-full border border-[#EAEAEA] dark:border-[#2E2E2E] shadow-sm space-y-4">
+            <div className="w-10 h-10 rounded-md bg-[#F0EFEA] dark:bg-[#2E2E2E] text-[#111111] dark:text-[#F0F0EE] flex items-center justify-center">
+              <Mic className="w-5 h-5" />
+            </div>
+            <h3 className="font-editorial-serif text-base font-bold text-[#111111] dark:text-[#F0F0EE]">
+              {language === 'ne' ? 'नेपाली बोली खोजी (Voice Search)' : 'Nepali Voice Search'}
+            </h3>
+            <p className="text-xs text-[#787774] dark:text-[#9B9A97] leading-relaxed">
+              {language === 'ne'
+                ? 'बोलेर बालीको भाउ खोज्ने सुविधा चाँडै उपलब्ध हुँदैछ। कृपया माथिको खोज बाकसमा टाइप गर्नुहोस्।'
+                : 'Nepali speech recognition for mandi price search is currently queued for real-time model integration. Please type above.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowVoiceRoadmapModal(false)}
+              className="w-full py-2 rounded-md bg-[#111111] text-white dark:bg-[#F0F0EE] dark:text-[#111111] text-xs font-medium cursor-pointer"
+            >
+              {t('common.close', 'Close')}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};

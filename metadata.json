@@ -1,0 +1,6 @@
+{
+  "name": "KrishiSetu",
+  "description": "Nepal's Agricultural Futures Intelligence Engine — Helping Nepali farmers decide what to plant, when to harvest, and where to sell to maximize profit with high-precision forecasting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
