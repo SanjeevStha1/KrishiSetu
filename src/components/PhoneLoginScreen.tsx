@@ -18,7 +18,7 @@ import {
   MapPin,
   Zap,
 } from 'lucide-react';
-import { AuthService, TEST_USER_ACCOUNTS } from '../services/authService';
+import { AuthService } from '../services/authService';
 import { AuthUser } from '../types/krishi';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -31,14 +31,14 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
 
   // Screen step: 'phone' or 'otp'
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [phoneNumber, setPhoneNumber] = useState<string>('9845012345');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [phoneError, setPhoneError] = useState<string>('');
-  const [detectedCarrier, setDetectedCarrier] = useState<string>('Nepal Telecom (NTC)');
-  const [selectedAccountId, setSelectedAccountId] = useState<string>('usr_ram_chitwan_001');
+  const [detectedCarrier, setDetectedCarrier] = useState<string>('');
 
   // OTP state
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [otpError, setOtpError] = useState<string>('');
+  const [sandboxOtpHint, setSandboxOtpHint] = useState<string | null>(null);
   const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
   const [resendCooldown, setResendCooldown] = useState<number>(0);
@@ -99,6 +99,7 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
     try {
       const res = await AuthService.sendPhoneOTP(validation.national);
       if (res.success) {
+        setSandboxOtpHint(res.testCode || null);
         setStep('otp');
         setOtpDigits(['', '', '', '', '', '']);
         setOtpError('');
@@ -115,30 +116,7 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
     }
   };
 
-  // Quick autofill demo phone
-  const handleUseDemoPhone = () => {
-    const demoNum = '9845012345';
-    setPhoneNumber(demoNum);
-    setPhoneError('');
-    setDetectedCarrier('Nepal Telecom (NTC)');
-  };
 
-  // Select one of the 3 test accounts
-  const handleSelectAccount = (acc: typeof TEST_USER_ACCOUNTS[0]) => {
-    setSelectedAccountId(acc.id);
-    setPhoneNumber(acc.rawDigits);
-    setPhoneError('');
-    const val = AuthService.validateNepalPhone(acc.rawDigits, language);
-    if (val.carrier) {
-      setDetectedCarrier(val.carrier);
-    }
-  };
-
-  // 1-Click instant test login for exhibition demo
-  const handleInstantLogin = (acc: typeof TEST_USER_ACCOUNTS[0]) => {
-    const user = AuthService.loginAsTestAccount(acc.id);
-    onLoginSuccess(user);
-  };
 
   // Handle OTP digit changes
   const handleOtpChange = (index: number, val: string) => {
@@ -180,9 +158,10 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
     otpInputRefs.current[targetIdx]?.focus();
   };
 
-  // Autofill Demo OTP 123456
+  // Autofill Sandbox OTP if provided by backend
   const handleAutofillDemoOtp = () => {
-    setOtpDigits(['1', '2', '3', '4', '5', '6']);
+    const code = sandboxOtpHint || '123456';
+    setOtpDigits(code.split('').slice(0, 6));
     setOtpError('');
   };
 
@@ -196,13 +175,6 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
       setOtpError(language === 'ne'
         ? 'कृपया ६ अंकको प्रमाणीकरण कोड पूरा भर्नुहोस्।'
         : 'Please enter the complete 6-digit verification code.');
-      return;
-    }
-
-    if (enteredCode !== '123456') {
-      setOtpError(language === 'ne'
-        ? 'गलत प्रमाणीकरण कोड। कृपया पुनः प्रयास गर्नुहोस्।'
-        : 'Invalid verification code. Please try again.');
       return;
     }
 
@@ -233,7 +205,8 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
     setResendSent(false);
     setOtpError('');
     try {
-      await AuthService.sendPhoneOTP(phoneNumber);
+      const res = await AuthService.sendPhoneOTP(phoneNumber);
+      setSandboxOtpHint(res.testCode || null);
       setResendCooldown(30);
       setResendSent(true);
       setTimeout(() => setResendSent(false), 3000);
@@ -244,10 +217,6 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
 
   const validation = AuthService.validateNepalPhone(phoneNumber, language);
   const displayPhone = validation.isValid ? validation.display : `+977 ${phoneNumber}`;
-  const cleanDigits = phoneNumber.replace(/\D/g, '');
-  const matchedTestAccount = TEST_USER_ACCOUNTS.find(
-    (acc) => cleanDigits.endsWith(acc.rawDigits) || acc.rawDigits === cleanDigits
-  );
 
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#1F1E1B] flex flex-col justify-between selection:bg-[#2E7D5A] selection:text-white">
@@ -414,103 +383,6 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
                     )}
                   </button>
                 </form>
-
-                {/* 3 Dedicated Test Accounts Selector */}
-                <div className="pt-3 border-t border-[#E8E2D8]">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[11px] font-black uppercase tracking-wider text-[#6B655B] flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-[#2E7D5A]" />
-                      {language === 'ne' ? '३ फरक परीक्षण किसान खाताहरू' : '3 Test Farmer Accounts'}
-                    </span>
-                    <span className="text-[10px] font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-200">
-                      Exhibition Ready
-                    </span>
-                  </div>
-
-                  <p className="text-[11px] text-[#6B655B] mb-2.5">
-                    {language === 'ne'
-                      ? 'सिधै लगइन गर्न वा नम्बर परीक्षण गर्न तलको कुनै एक किसान खाता रोज्नुहोस्:'
-                      : 'Select any of the 3 pre-configured farmer accounts to test different locations & crops:'}
-                  </p>
-
-                  <div className="space-y-2">
-                    {TEST_USER_ACCOUNTS.map((acc, index) => {
-                      const isSelected = matchedTestAccount?.id === acc.id;
-                      return (
-                        <div
-                          key={acc.id}
-                          className={`p-2.5 sm:p-3 rounded-2xl border transition-all text-left flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
-                            isSelected
-                              ? 'bg-[#2E7D5A]/5 border-[#2E7D5A] shadow-xs ring-1 ring-[#2E7D5A]/20'
-                              : 'bg-white border-[#E8E2D8] hover:border-[#2E7D5A]/40'
-                          }`}
-                        >
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <span className="w-5 h-5 rounded-full bg-[#2E7D5A]/10 text-[#2E7D5A] font-black text-[11px] flex items-center justify-center shrink-0">
-                                {index + 1}
-                              </span>
-                              <span className="text-xs font-black text-[#1F1E1B]">
-                                {acc.name}
-                              </span>
-                              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-[#FAF7F2] border border-[#E8E2D8] text-[#6B655B] flex items-center gap-1">
-                                <MapPin className="w-2.5 h-2.5 text-[#2E7D5A]" />
-                                {acc.district.toUpperCase()}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-[#6B655B]">
-                              <span className="font-mono font-bold text-[#1F1E1B]">
-                                {acc.phone}
-                              </span>
-                              <span>•</span>
-                              <span>{acc.landSize} Ropani</span>
-                              <span>•</span>
-                              <span className="text-[#2E7D5A] font-medium">{acc.primaryCrops.join(', ')}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 self-end sm:self-center shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleSelectAccount(acc)}
-                              className={`px-2 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                                isSelected
-                                  ? 'bg-[#2E7D5A] text-white'
-                                  : 'bg-[#FAF7F2] hover:bg-[#E8E2D8] text-[#1F1E1B] border border-[#E8E2D8]'
-                              }`}
-                            >
-                              {isSelected ? (
-                                <span className="flex items-center gap-1">
-                                  <Check className="w-3 h-3" />
-                                  {language === 'ne' ? 'छानियो' : 'Selected'}
-                                </span>
-                              ) : (
-                                <span>{language === 'ne' ? 'नम्बर राख्नुहोस्' : 'Use Number'}</span>
-                              )}
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() => handleInstantLogin(acc)}
-                              className="px-2.5 py-1 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-900 border border-amber-300/70 text-xs font-extrabold flex items-center gap-1 transition cursor-pointer shadow-2xs"
-                              title="Instant Login"
-                            >
-                              <Zap className="w-3 h-3 text-amber-600" />
-                              <span>{language === 'ne' ? 'सिधै लगइन' : 'Instant Login'}</span>
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <p className="text-[10px] text-[#8C8477] text-center pt-2">
-                    {language === 'ne'
-                      ? 'वा कुनै पनि नयाँ १० अंकको नम्बर राखी नयाँ किसान दर्ता परीक्षण गर्नुहोस्।'
-                      : 'Or enter any other 10-digit number above to test dynamic new farmer registration.'}
-                  </p>
-                </div>
               </motion.div>
             ) : (
               <motion.div
@@ -534,31 +406,10 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
                   <span>{language === 'ne' ? 'फोन नम्बर बदल्नुहोस्' : 'Change phone number'}</span>
                 </button>
 
-                {/* Account Profile Banner in OTP screen */}
-                {matchedTestAccount ? (
-                  <div className="p-3 rounded-2xl bg-[#2E7D5A]/10 border border-[#2E7D5A]/25 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-[#2E7D5A] text-white flex items-center justify-center font-black text-xs shadow-xs">
-                        {matchedTestAccount.name.slice(0, 2)}
-                      </div>
-                      <div>
-                        <div className="text-xs font-black text-[#1F1E1B]">
-                          {matchedTestAccount.name}
-                        </div>
-                        <div className="text-[11px] text-[#2E7D5A] font-semibold">
-                          {matchedTestAccount.farmName} ({matchedTestAccount.district.toUpperCase()})
-                        </div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#2E7D5A] text-white">
-                      Test Profile
-                    </span>
-                  </div>
-                ) : (
-                  <div className="p-2.5 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] text-center text-xs text-[#6B655B]">
-                    New Farmer Profile for <span className="font-bold text-[#1F1E1B]">{displayPhone}</span>
-                  </div>
-                )}
+                <div className="p-2.5 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] text-center text-xs text-[#6B655B]">
+                  {language === 'ne' ? 'मोबाइल नम्बर:' : 'Verifying:'}{' '}
+                  <span className="font-bold text-[#1F1E1B]">{displayPhone}</span>
+                </div>
 
                 {/* Heading */}
                 <div className="space-y-1.5 text-center">
@@ -581,35 +432,37 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
                   </p>
                 </div>
 
-                {/* Prominent Demo OTP Box */}
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                      <Lock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
-                          Demo OTP:
-                        </span>
-                        <span className="font-mono text-base font-black text-[#2E7D5A] tracking-wider px-2 py-0.5 bg-white rounded-md border border-amber-200">
-                          123456
-                        </span>
+                {/* Prominent Sandbox OTP Box (only rendered when server uses sandbox queue) */}
+                {sandboxOtpHint && (
+                  <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                        <Lock className="w-4 h-4" />
                       </div>
-                      <p className="text-[10px] text-amber-900/80 font-medium">
-                        {language === 'ne' ? 'प्रदर्शनीका लागि यो कोड प्रयोग गर्नुहोस्' : 'Exhibition prototype code'}
-                      </p>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-black text-amber-950 uppercase tracking-wider">
+                            Sandbox OTP:
+                          </span>
+                          <span className="font-mono text-base font-black text-[#2E7D5A] tracking-wider px-2 py-0.5 bg-white rounded-md border border-amber-200">
+                            {sandboxOtpHint}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-amber-900/80 font-medium">
+                          {language === 'ne' ? 'परीक्षण मोड कोड (SMS गेटवे बिना)' : 'Sandbox mode test code'}
+                        </p>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAutofillDemoOtp}
-                    className="px-2.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold transition cursor-pointer shrink-0 shadow-xs"
-                  >
-                    {language === 'ne' ? 'कोड भर्नुहोस्' : 'Autofill'}
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={handleAutofillDemoOtp}
+                      className="px-2.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold transition cursor-pointer shrink-0 shadow-xs"
+                    >
+                      {language === 'ne' ? 'कोड भर्नुहोस्' : 'Autofill'}
+                    </button>
+                  </div>
+                )}
 
                 {/* 6-Digit OTP Inputs */}
                 <form onSubmit={handleVerifySubmit} className="space-y-4">
@@ -706,27 +559,13 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
 
                   {resendSent && (
                     <p className="text-center text-[11px] text-[#2E7D5A] font-bold">
-                      {language === 'ne' ? 'नयाँ कोड पठाइयो (Demo: 123456)' : 'New code sent (Demo: 123456)'}
+                      {sandboxOtpHint
+                        ? (language === 'ne' ? `नयाँ कोड पठाइयो (Sandbox: ${sandboxOtpHint})` : `New code sent (Sandbox: ${sandboxOtpHint})`)
+                        : (language === 'ne' ? 'तपाईँको मोबाइलमा नयाँ SMS कोड पठाइयो।' : 'New SMS verification code sent to your phone.')}
                     </p>
                   )}
                 </form>
 
-                {/* Target Demo Farmer Info */}
-                <div className="p-3 rounded-2xl bg-[#FAF7F2] border border-[#E8E2D8] flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#2E7D5A] to-[#10B981] text-white font-black text-sm flex items-center justify-center shrink-0">
-                    R
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-extrabold text-[#1F1E1B]">
-                      {language === 'ne' ? 'खाता: रामबहादुर थापा' : 'Account: Ram Bahadur Thapa'}
-                    </div>
-                    <p className="text-[10px] text-[#6B655B]">
-                      {language === 'ne'
-                        ? 'भरतपुर-११, चितवन • १.२ रोपनी • गोलभेडा / काउली'
-                        : 'Bharatpur-11, Chitwan • 1.2 Ropani • Tomato / Cauliflower'}
-                    </p>
-                  </div>
-                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -735,10 +574,7 @@ export const PhoneLoginScreen: React.FC<PhoneLoginScreenProps> = ({ onLoginSucce
 
       {/* Footer */}
       <footer className="w-full border-t border-[#E8E2D8] bg-[#FAF7F2] px-4 py-3 text-center text-xs text-[#6B655B] mt-auto">
-        <p>
-          KrishiSetu Nepal • College Exhibition Prototype • Demo Account:{' '}
-          <strong className="text-[#1F1E1B]">Ram Bahadur Thapa</strong>
-        </p>
+        <p>KrishiSetu Nepal • Nationwide Farmer Market Intelligence Platform</p>
       </footer>
     </div>
   );

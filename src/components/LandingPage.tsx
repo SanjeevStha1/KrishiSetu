@@ -52,7 +52,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
   const [regCrops, setRegCrops] = useState<string[]>(['tomato', 'cauliflower']);
 
   // OTP State
-  const [otpDigits, setOtpDigits] = useState<string[]>(['1', '2', '3', '4', '5', '6']);
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [sandboxOtpHint, setSandboxOtpHint] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,12 +65,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     setModalMode(mode);
     setAuthStep('form');
     setAuthError(null);
+    setSandboxOtpHint(null);
+    setOtpDigits(['', '', '', '', '', '']);
   };
 
   const handleCloseAuth = () => {
     setModalMode(null);
     setAuthStep('form');
     setAuthError(null);
+    setSandboxOtpHint(null);
+    setOtpDigits(['', '', '', '', '', '']);
   };
 
   const toggleCropSelection = (cropId: string) => {
@@ -121,9 +126,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
         return;
       }
 
+      if (!res.success) {
+        setAuthError(res.error || res.message || 'Failed to send verification code.');
+        return;
+      }
+
+      setSandboxOtpHint(res.testCode || null);
       setAuthStep('otp');
-      // Default to dev test code for seamless preview testing
-      setOtpDigits(['1', '2', '3', '4', '5', '6']);
+      setOtpDigits(res.testCode ? res.testCode.split('').slice(0, 6) : ['', '', '', '', '', '']);
     } catch (err: any) {
       setAuthError(err.message || 'Error sending code.');
     } finally {
@@ -135,8 +145,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     e.preventDefault();
     setAuthError(null);
 
-    const fullCode = otpDigits.join('');
-    if (fullCode.length !== 6) {
+    const fullCode = otpDigits.join('').trim();
+    if (!/^\d{6}$/.test(fullCode)) {
       setAuthError(isNe ? '६ अङ्कको कोड प्रविष्ट गर्नुहोस्।' : 'Enter 6-digit verification code.');
       return;
     }
@@ -144,7 +154,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
     setIsSubmitting(true);
     try {
       if (modalMode === 'register') {
-        // Register new farmer
+        // Register new farmer with verified OTP code
         const res = await AuthService.registerFarmerUser({
           phone: regPhone,
           name: regName.trim(),
@@ -152,6 +162,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           landSize: regLandSize,
           landUnit: regLandUnit,
           primaryCrops: regCrops,
+          code: fullCode,
         });
 
         if (res.success && res.user) {
@@ -159,7 +170,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           handleCloseAuth();
           return;
         } else {
-          setAuthError(res.error || 'Registration failed.');
+          setAuthError(
+            res.error ||
+              res.message ||
+              (isNe ? 'दर्ता प्रक्रिया सफल भएन।' : 'Registration failed.')
+          );
         }
       } else {
         // Verify login
@@ -174,7 +189,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
           handleCloseAuth();
           return;
         } else {
-          setAuthError(res.error || (isNe ? 'कोड मिलेन वा म्याद सकियो।' : 'Invalid code.'));
+          setAuthError(
+            res.error ||
+              res.message ||
+              (isNe ? 'कोड मिलेन वा म्याद सकियो।' : 'Invalid or expired verification code.')
+          );
         }
       }
     } catch (err: any) {
@@ -691,6 +710,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                       setModalMode('login');
                       setAuthStep('form');
                       setAuthError(null);
+                      setSandboxOtpHint(null);
                     }}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       modalMode === 'login'
@@ -706,6 +726,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                       setModalMode('register');
                       setAuthStep('form');
                       setAuthError(null);
+                      setSandboxOtpHint(null);
                     }}
                     className={`px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
                       modalMode === 'register'
@@ -749,7 +770,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                           required
                           value={regName}
                           onChange={(e) => setRegName(e.target.value)}
-                          placeholder={isNe ? 'उदा: राम बहादुर थापा' : 'e.g. Ram Bahadur Thapa'}
+                          placeholder={isNe ? 'उदा: सुमन अधिकारी' : 'e.g. Suman Adhikari'}
                           className="w-full px-3.5 py-2.5 rounded-xl border border-[#D5CEC2] bg-[#FAF7F2] text-sm text-[#1F1E1B] focus:border-[#2E7D5A] focus:bg-white outline-hidden transition"
                         />
                       </div>
@@ -909,6 +930,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                         key={idx}
                         id={`otp-box-${idx}`}
                         type="text"
+                        inputMode="numeric"
                         maxLength={1}
                         value={digit}
                         onChange={(e) => {
@@ -920,6 +942,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                             document.getElementById(`otp-box-${idx + 1}`)?.focus();
                           }
                         }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                          if (!pasted) return;
+                          const next = ['', '', '', '', '', ''];
+                          for (let i = 0; i < 6; i++) {
+                            next[i] = pasted[i] || '';
+                          }
+                          setOtpDigits(next);
+                          document.getElementById(`otp-box-${Math.min(pasted.length, 5)}`)?.focus();
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Backspace' && !otpDigits[idx] && idx > 0) {
                             document.getElementById(`otp-box-${idx - 1}`)?.focus();
@@ -930,17 +963,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onLoginSuccess }) => {
                     ))}
                   </div>
 
-                  {/* Sandbox helper */}
-                  <div className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D8] text-[11px] text-[#78716A] flex items-center justify-between">
-                    <span>{isNe ? 'परीक्षण कोड: १२३४५६' : 'Dev Test Code: 123456'}</span>
-                    <button
-                      type="button"
-                      onClick={() => setOtpDigits(['1', '2', '3', '4', '5', '6'])}
-                      className="text-[#2E7D5A] font-bold hover:underline cursor-pointer"
-                    >
-                      {isNe ? 'स्वतः भर्नुहोस्' : 'Auto Fill'}
-                    </button>
-                  </div>
+                  {/* Sandbox helper (only shown when backend returns a dev/sandbox test OTP) */}
+                  {sandboxOtpHint && (
+                    <div className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E8E2D8] text-[11px] text-[#78716A] flex items-center justify-between">
+                      <span>
+                        {isNe ? `परीक्षण कोड: ${sandboxOtpHint}` : `Dev Test Code: ${sandboxOtpHint}`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setOtpDigits(sandboxOtpHint.split('').slice(0, 6))}
+                        className="text-[#2E7D5A] font-bold hover:underline cursor-pointer"
+                      >
+                        {isNe ? 'स्वतः भर्नुहोस्' : 'Auto Fill'}
+                      </button>
+                    </div>
+                  )}
 
                   <button
                     type="submit"

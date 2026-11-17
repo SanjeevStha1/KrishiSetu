@@ -98,7 +98,7 @@ class FarmRecordsManager {
     this.init();
     if (typeof window !== 'undefined') {
       AuthService.subscribe((user) => {
-        const newId = user?.id || user?.uid || 'usr_ram_chitwan_001';
+        const newId = user?.id || user?.uid || 'guest_local';
         if (newId !== this.currentUserId) {
           this.init(newId);
         }
@@ -112,8 +112,7 @@ class FarmRecordsManager {
 
   public init(customUserId?: string) {
     const user = AuthService.getCurrentUser();
-    const userId = customUserId || user?.id || user?.uid || 'usr_ram_chitwan_001';
-    const isNewUser = userId !== 'usr_ram_chitwan_001';
+    const userId = customUserId || user?.id || user?.uid || 'guest_local';
     this.currentUserId = userId;
 
     try {
@@ -122,16 +121,11 @@ class FarmRecordsManager {
       if (saved !== null) {
         this.records = JSON.parse(saved);
       } else {
-        // Only default demo user gets initial demo records; ALL other accounts start completely empty
-        if (isNewUser) {
-          this.records = [];
-        } else {
-          this.records = generateDemoBaselineRecords();
-        }
+        this.records = [];
         localStorage.setItem(storageKey, JSON.stringify(this.records));
       }
     } catch (e) {
-      this.records = isNewUser ? [] : generateDemoBaselineRecords();
+      this.records = [];
     }
 
     this.notify();

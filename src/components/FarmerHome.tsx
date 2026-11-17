@@ -37,12 +37,14 @@ import { PriceAlertModal } from './PriceAlertModal';
 import { DispatchScheduleModal, ScheduleDayItem } from './DispatchScheduleModal';
 import { useLanguage } from '../context/LanguageContext';
 import { FarmRecordsService } from '../services/farmRecordsService';
+import { DistrictWeatherWidget } from './DistrictWeatherWidget';
 import { THEME } from '../theme';
 
 interface FarmerHomeProps {
   commodities: Commodity[];
   alerts: DisruptionAlert[];
   selectedDistrict: string;
+  setSelectedDistrict?: (district: string) => void;
   userProfile?: UserProfile;
   onNavigate: (tab: AppTab, extra?: { commodityId?: string }) => void;
   onOpenHowItWorks?: () => void;
@@ -52,6 +54,7 @@ export const FarmerHome: React.FC<FarmerHomeProps> = ({
   commodities,
   alerts,
   selectedDistrict,
+  setSelectedDistrict,
   userProfile,
   onNavigate,
   onOpenHowItWorks,
@@ -333,9 +336,20 @@ export const FarmerHome: React.FC<FarmerHomeProps> = ({
       </section>
 
       {/* ========================================================
+          LIVE DISTRICT MICROCLIMATE & FIELD WEATHER ADVISORY
+         ======================================================== */}
+      <section className="space-y-2">
+        <DistrictWeatherWidget
+          selectedDistrict={selectedDistrict}
+          setSelectedDistrict={setSelectedDistrict}
+          compact={false}
+        />
+      </section>
+
+      {/* ========================================================
           2. SECTION: Today's Kalimati Agricultural Market Overview
          ======================================================== */}
-      <section className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-xs space-y-5">
+      <section className="bg-white dark:bg-[#22201D] rounded-3xl p-6 sm:p-7 border border-slate-200/80 dark:border-[#383530] shadow-xs space-y-5 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFF6FF] text-[#2563EB] text-xs font-extrabold uppercase tracking-wide mb-1">
@@ -772,7 +786,9 @@ export const FarmerHome: React.FC<FarmerHomeProps> = ({
         <PriceAlertModal
           isOpen={isSmsModalOpen}
           onClose={() => setIsSmsModalOpen(false)}
-          commodity={topCrop}
+          selectedDistrict={selectedDistrict}
+          initialCropId={topCrop?.id}
+          commodities={commodities}
           userProfile={userProfile}
         />
       )}

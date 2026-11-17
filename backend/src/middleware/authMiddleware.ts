@@ -17,16 +17,20 @@ export function getBearerToken(req: Request): string | null {
 /**
  * Optional authentication: extracts session if token provided, but doesn't block unauthenticated requests.
  */
-export function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const token = getBearerToken(req);
-  if (token) {
-    const session = authStore.validateSession(token);
-    if (session.isValid && session.user) {
-      req.userId = session.user.id;
-      req.user = session.user;
-      req.profile = session.profile;
-      req.farm = session.farm;
+export async function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const token = getBearerToken(req);
+    if (token) {
+      const session = await authStore.validateSessionAsync(token);
+      if (session.isValid && session.user) {
+        req.userId = session.user.id;
+        req.user = session.user;
+        req.profile = session.profile;
+        req.farm = session.farm;
+      }
     }
+  } catch {
+    // non-fatal for optional auth
   }
   next();
 }
@@ -34,20 +38,24 @@ export function optionalAuthMiddleware(req: AuthenticatedRequest, res: Response,
 /**
  * Strict authentication: rejects requests without a valid session token.
  */
-export function requireAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  const token = getBearerToken(req);
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'Authentication token is required' });
-  }
+export async function requireAuthMiddleware(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  try {
+    const token = getBearerToken(req);
+    if (!token) {
+      return res.status(401).json({ success: false, error: 'Authentication token is required' });
+    }
 
-  const session = authStore.validateSession(token);
-  if (!session.isValid || !session.user) {
-    return res.status(401).json({ success: false, error: 'Session has expired or is invalid. Please sign in again.' });
-  }
+    const session = await authStore.validateSessionAsync(token);
+    if (!session.isValid || !session.user) {
+      return res.status(401).json({ success: false, error: 'Session has expired or is invalid. Please sign in again.' });
+    }
 
-  req.userId = session.user.id;
-  req.user = session.user;
-  req.profile = session.profile;
-  req.farm = session.farm;
-  next();
+    req.userId = session.user.id;
+    req.user = session.user;
+    req.profile = session.profile;
+    req.farm = session.farm;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, error: 'Invalid authentication session' });
+  }
 }

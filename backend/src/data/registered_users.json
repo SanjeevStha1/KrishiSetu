@@ -1,0 +1,66 @@
+{
+  "users": [
+    {
+      "id": "usr_1794813439566_iqozj",
+      "uid": "usr_1794813439566_iqozj",
+      "name": "Sanjeev Shrestha",
+      "phone": "+977 981 111 1111",
+      "normalizedPhone": "+9779811111111",
+      "phoneVerified": true,
+      "status": "active",
+      "preferredLanguage": "ne",
+      "province": "Bagmati",
+      "district": "chitwan",
+      "municipality": "",
+      "ward": "1",
+      "locality": "",
+      "landSize": 2,
+      "landUnit": "ropani",
+      "landSizeRopani": 2,
+      "farmName": "Sanjeev Shrestha's Agro Farm",
+      "primaryCrops": [
+        "tomato",
+        "cauliflower"
+      ],
+      "profileCompletionPct": 100,
+      "isGuest": false,
+      "isRegistered": true,
+      "createdAt": "2026-11-16T07:17:19.566Z",
+      "created_at": "2026-11-16T07:17:19.566Z"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "prof_usr_1794813439566_iqozj",
+      "userId": "usr_1794813439566_iqozj",
+      "fullName": "Sanjeev Shrestha",
+      "preferredLanguage": "ne",
+      "province": "Bagmati",
+      "district": "chitwan",
+      "municipality": "",
+      "ward": "1",
+      "locality": "",
+      "profileCompletionPct": 100,
+      "createdAt": "2026-11-16T07:17:19.566Z",
+      "updatedAt": "2026-11-16T07:17:19.566Z"
+    }
+  ],
+  "farms": [
+    {
+      "id": "farm_usr_1794813439566_iqozj",
+      "farmer_id": "usr_1794813439566_iqozj",
+      "farm_name": "Sanjeev Shrestha's Agro Farm",
+      "land_size": 2,
+      "land_unit": "ropani",
+      "land_size_ropani_eqv": 2,
+      "soil_type": "Alluvial Loam / दोमट माटो",
+      "irrigation_type": "Drip / थोपा सिँचाइ",
+      "primary_crops": [
+        "tomato",
+        "cauliflower"
+      ],
+      "created_at": "2026-11-16T07:17:19.566Z",
+      "updated_at": "2026-11-16T07:43:15.667Z"
+    }
+  ]
+}

@@ -27,13 +27,13 @@ export class DecisionController {
     }
   }
 
-  public static getAnalytics(req: Request, res: Response) {
+  public static async getAnalytics(req: Request, res: Response) {
     try {
       const token = getBearerToken(req);
-      let userId = 'usr_ram_chitwan_001';
+      let userId = 'guest_unauthenticated';
 
       if (token) {
-        const session = authStore.validateSession(token);
+        const session = await authStore.validateSessionAsync(token);
         if (session.isValid && session.user) {
           userId = session.user.id;
         }

@@ -3,6 +3,9 @@ import { AgriNewsFeedScraper } from '../scrapers/agriNewsScraper';
 
 export const newsRouter = Router();
 
+let lastNewsSyncMs = 0;
+const NEWS_SYNC_INTERVAL_MS = 2 * 60 * 60 * 1000;
+
 /**
  * GET /api/news
  * Fetches latest agricultural bulletins, circulars, and research advisories
@@ -10,6 +13,11 @@ export const newsRouter = Router();
  */
 newsRouter.get('/', async (req: Request, res: Response) => {
   try {
+    if (Date.now() - lastNewsSyncMs > NEWS_SYNC_INTERVAL_MS) {
+      lastNewsSyncMs = Date.now();
+      await AgriNewsFeedScraper.checkAndSyncFeeds().catch(() => null);
+    }
+
     const { category, district, search } = req.query;
     const data = AgriNewsFeedScraper.getCurrentResponse();
 

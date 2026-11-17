@@ -10,6 +10,8 @@ import { weatherRouter } from './routes/weatherRoutes';
 import { marketplaceRouter } from './routes/marketplaceRoutes';
 import { newsRouter } from './routes/newsRoutes';
 import { errorHandler } from './middleware/errorHandler';
+import { SmsService } from './services/smsService';
+import { NEPAL_DISTRICTS_MANDIS } from './data/nepalMandis';
 
 export function createBackendApp(): Express {
   const app = express();
@@ -17,9 +19,25 @@ export function createBackendApp(): Express {
   // Core middlewares
   app.use(express.json());
 
-  // Health check
+  // Health & Deployment Readiness check (strictly non-secret boolean flags)
   app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString(), service: 'KrishiSetu Backend API' });
+    const smsCfg = SmsService.getGatewayConfig();
+    res.json({
+      status: 'ok',
+      time: new Date().toISOString(),
+      service: 'KrishiSetu Backend API',
+      environment: process.env.NODE_ENV || 'development',
+      readiness: {
+        cloudSqlConfigured: Boolean((process.env.SQL_HOST || process.env.DATABASE_URL || '').trim()),
+        geminiConfigured: Boolean((process.env.GEMINI_API_KEY || '').trim()),
+        openRouterConfigured: Boolean((process.env.OPENROUTER_API_KEY || '').trim()),
+        sessionSecretConfigured: Boolean((process.env.SESSION_SECRET || '').trim()),
+        smsProvider: smsCfg.activeProvider,
+        smsLiveEnabled: smsCfg.isLiveGateway,
+        trackedDistricts: NEPAL_DISTRICTS_MANDIS.length,
+        trackedCrops: 23,
+      },
+    });
   });
 
   // Mount API Routers

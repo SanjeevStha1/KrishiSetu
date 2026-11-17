@@ -138,14 +138,24 @@ const SEEDED_LISTINGS: MarketplaceListing[] = [
   },
 ];
 
+import { DbStorageService } from '../services/dbStorageService';
+
 let dynamicListings: MarketplaceListing[] = [...SEEDED_LISTINGS];
 
 export class MarketplaceController {
-  public static getListings(req: Request, res: Response) {
+  public static async getListings(req: Request, res: Response) {
     const crop = (req.query.crop as string) || (req.query.cropId as string);
     const district = req.query.district as string;
 
-    let results = dynamicListings;
+    const dbListings = await DbStorageService.getMarketplaceListings(crop, district);
+
+    const combinedMap = new Map<string, MarketplaceListing>();
+    dbListings.forEach((l) => combinedMap.set(l.id, l));
+    dynamicListings.forEach((l) => {
+      if (!combinedMap.has(l.id)) combinedMap.set(l.id, l);
+    });
+
+    let results = Array.from(combinedMap.values());
     if (crop && crop !== 'all') {
       results = results.filter((l) => (l.cropId || l.crop).toLowerCase() === crop.toLowerCase());
     }
@@ -231,6 +241,10 @@ export class MarketplaceController {
 
       // Add to front of listings so other users see it immediately
       dynamicListings.unshift(newListing);
+      // Persist asynchronously to Cloud SQL
+      DbStorageService.saveMarketplaceListing(newListing).catch((e) =>
+        console.warn('[Marketplace] Error persisting to Cloud SQL:', e?.message)
+      );
 
       console.log(`[Marketplace] New listing published by ${farmerName} (${district}): ${quantityKg}kg ${cropName}`);
 

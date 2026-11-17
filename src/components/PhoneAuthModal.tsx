@@ -48,8 +48,8 @@ export const PhoneAuthModal: React.FC<PhoneAuthModalProps> = ({
   const [step, setStep] = useState<AuthStep>('phone');
 
   // Phone state
-  const [rawPhone, setRawPhone] = useState('9845012345');
-  const [carrierInfo, setCarrierInfo] = useState<string>('Nepal Telecom (NTC)');
+  const [rawPhone, setRawPhone] = useState('');
+  const [carrierInfo, setCarrierInfo] = useState<string>('');
 
   // OTP state
   const [otpCode, setOtpCode] = useState<string[]>(['', '', '', '', '', '']);
@@ -138,7 +138,7 @@ export const PhoneAuthModal: React.FC<PhoneAuthModalProps> = ({
       }
 
       if (res.success) {
-        setTestCodeHint(res.testCode || '123456');
+        setTestCodeHint(res.testCode || null);
         setResendCooldown(res.cooldownSec || 30);
         setStep('otp');
         // Reset OTP fields

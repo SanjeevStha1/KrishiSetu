@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   RefreshCw,
   Sparkles,
+  MessageCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MarketplaceListing, AuthUser, UserProfile } from '../types/krishi';
@@ -46,6 +47,17 @@ export interface DirectBuyer {
   typeEn: string;
   typeNe: string;
   phone: string;
+}
+
+function getWhatsAppUrl(phone: string, text: string): string {
+  const digits = (phone || '').replace(/\D/g, '');
+  const normalized = digits.startsWith('977') ? digits : digits.length === 10 ? `977${digits}` : digits;
+  return `https://wa.me/${normalized}?text=${encodeURIComponent(text)}`;
+}
+
+function getTelUrl(phone: string): string {
+  const digits = (phone || '').replace(/[^\d+]/g, '');
+  return `tel:${digits}`;
 }
 
 export const MarketplaceConcept: React.FC<MarketplaceConceptProps> = ({
@@ -478,8 +490,8 @@ export const MarketplaceConcept: React.FC<MarketplaceConceptProps> = ({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
+                        <a
+                          href={getTelUrl(buyer.phone)}
                           onClick={(e) => {
                             e.stopPropagation();
                             setContactSuccessBuyer(isNe ? buyer.nameNe : buyer.nameEn);
@@ -487,8 +499,23 @@ export const MarketplaceConcept: React.FC<MarketplaceConceptProps> = ({
                           className="px-3 py-1.5 rounded-lg bg-[#2E7D5A] hover:bg-[#246648] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition active:scale-[0.98]"
                         >
                           <Phone className="w-3.5 h-3.5" />
-                          <span>{isNe ? 'सम्पर्क' : 'Contact'}</span>
-                        </button>
+                          <span>{isNe ? 'कल' : 'Call'}</span>
+                        </a>
+                        <a
+                          href={getWhatsAppUrl(
+                            buyer.phone,
+                            isNe
+                              ? `नमस्ते ${buyer.nameNe}, म KrishiSetu मार्फत ${buyer.volumeKg} kg ${buyer.cropId} बिक्रीका लागि सम्पर्क गर्दैछु। दर: रु ${buyer.rate}/kg।`
+                              : `Hello ${buyer.nameEn}, I am contacting you via KrishiSetu regarding supply of ${buyer.volumeKg}kg ${buyer.cropId} at Rs ${buyer.rate}/kg.`
+                          )}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition active:scale-[0.98]"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
                       </div>
                     </div>
                   )}
@@ -708,19 +735,20 @@ export const MarketplaceConcept: React.FC<MarketplaceConceptProps> = ({
                             <span>{isNe ? 'फोन सम्पर्क' : 'Call Farmer'}</span>
                           </a>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setContactSuccessBuyer(
-                                isNe
-                                  ? `${lot.nepaliName} अर्डर माग किसान ${lot.farmerName} लाई पठाइयो।`
-                                  : `Order inquiry sent to ${lot.farmerName}.`
-                              );
-                            }}
-                            className="px-3 py-2 rounded-xl bg-[#FAF7F2] dark:bg-[#262421] border border-[#E8E2D8] dark:border-[#383530] hover:bg-white text-[#1F1E1B] dark:text-[#F5F3EF] font-bold text-xs flex items-center justify-center transition cursor-pointer"
+                          <a
+                            href={getWhatsAppUrl(
+                              lot.farmerPhone || '+9779845012345',
+                              isNe
+                                ? `नमस्ते ${lot.farmerName} ज्यू, म तपाईंको KrishiSetu मा राखिएको ${lot.quantityKg} kg ${lot.nepaliName || lot.cropName} (रु ${lot.askingPricePerKg || lot.pricePerKg}/kg) खरिद गर्न चाहन्छु। संकलन स्थान: ${lot.pickupHub || lot.village}।`
+                                : `Hello ${lot.farmerName}, I want to purchase your ${lot.quantityKg}kg ${lot.cropName} listed on KrishiSetu at Rs ${lot.askingPricePerKg || lot.pricePerKg}/kg.`
+                            )}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-2 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white font-bold text-xs flex items-center justify-center gap-1 transition cursor-pointer shadow-2xs"
                           >
-                            <span>{isNe ? 'माग' : 'Inquire'}</span>
-                          </button>
+                            <MessageCircle className="w-3.5 h-3.5" />
+                            <span>WhatsApp</span>
+                          </a>
                         </div>
                       )}
                     </div>

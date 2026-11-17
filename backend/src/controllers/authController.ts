@@ -1,15 +1,17 @@
 import { Request, Response } from 'express';
 import { authStore } from '../services/authStore';
+import { SmsService } from '../services/smsService';
+import { DbStorageService } from '../services/dbStorageService';
 import { AuthenticatedRequest, getBearerToken } from '../middleware/authMiddleware';
 
 export class AuthController {
-  public static checkPhone(req: Request, res: Response) {
+  public static async checkPhone(req: Request, res: Response) {
     try {
       const { phone } = req.body;
       if (!phone) {
         return res.status(400).json({ success: false, error: 'Phone number is required' });
       }
-      const existing = authStore.findUserByPhone(phone);
+      const existing = await authStore.findUserByPhoneAsync(phone);
       if (existing) {
         return res.json({
           success: true,
@@ -60,7 +62,7 @@ export class AuthController {
       }
 
       // Check if phone already in database
-      const existing = authStore.findUserByPhone(phone);
+      const existing = await authStore.findUserByPhoneAsync(phone);
       if (existing) {
         return res.status(409).json({
           success: false,
@@ -75,17 +77,22 @@ export class AuthController {
         });
       }
 
-      // Verify OTP code if provided (prototype accepts 123456)
-      if (code) {
+      // Verify OTP code via SmsService (mandatory when live SMS gateway is enabled or code is provided)
+      const isLiveGateway = SmsService.getGatewayConfig().isLiveGateway;
+      if (isLiveGateway && !code) {
+        return res.status(400).json({
+          success: false,
+          error: 'A 6-digit verification code is required to create an account.',
+        });
+      }
+      if (code !== undefined && code !== null && String(code).trim() !== '') {
         const cleanCode = String(code).trim();
-        if (cleanCode !== '123456') {
-          const verification = authStore.verifyOtp(phone, cleanCode);
-          if (!verification.success) {
-            return res.status(400).json({
-              success: false,
-              error: 'Invalid verification code. Please check and try again.',
-            });
-          }
+        const verification = authStore.verifyOtp(phone, cleanCode);
+        if (!verification.success) {
+          return res.status(400).json({
+            success: false,
+            error: verification.error || 'Invalid verification code. Please check and try again.',
+          });
         }
       }
 
@@ -101,6 +108,10 @@ export class AuthController {
         landUnit: landUnit || 'ropani',
         primaryCrops: Array.isArray(primaryCrops) && primaryCrops.length > 0 ? primaryCrops : ['tomato', 'potato'],
       });
+
+      await DbStorageService.upsertUser(user).catch((e) =>
+        console.warn('[AuthController.register] Cloud SQL user sync warning:', e?.message)
+      );
 
       return res.status(201).json({
         success: true,
@@ -123,7 +134,7 @@ export class AuthController {
         return res.status(400).json({ success: false, error: 'Phone number is required' });
       }
 
-      const existingUser = authStore.findUserByPhone(phone);
+      const existingUser = await authStore.findUserByPhoneAsync(phone);
 
       // If user is trying to REGISTER with a number already in database
       if (intent === 'register' && existingUser) {
@@ -169,15 +180,13 @@ export class AuthController {
       }
 
       const cleanCode = String(code).trim();
-      if (cleanCode !== '123456') {
-        const verification = authStore.verifyOtp(phone, cleanCode);
-        if (!verification.success) {
-          return res.status(400).json(verification);
-        }
+      const verification = authStore.verifyOtp(phone, cleanCode);
+      if (!verification.success) {
+        return res.status(400).json(verification);
       }
 
       // Find user by phone in database
-      let activeUser = authStore.findUserByPhone(phone);
+      const activeUser = await authStore.findUserByPhoneAsync(phone);
 
       if (intent === 'login' && !activeUser) {
         return res.status(404).json({
@@ -248,14 +257,14 @@ export class AuthController {
     }
   }
 
-  public static completeProfile(req: AuthenticatedRequest, res: Response) {
+  public static async completeProfile(req: AuthenticatedRequest, res: Response) {
     try {
       const token = getBearerToken(req);
       if (!token) {
         return res.status(401).json({ success: false, error: 'Authentication token is required' });
       }
 
-      const session = authStore.validateSession(token);
+      const session = await authStore.validateSessionAsync(token);
       if (!session.isValid || !session.user) {
         return res.status(401).json({ success: false, error: 'Session has expired. Please sign in again.' });
       }
@@ -313,14 +322,14 @@ export class AuthController {
     }
   }
 
-  public static getMe(req: Request, res: Response) {
+  public static async getMe(req: Request, res: Response) {
     try {
       const token = getBearerToken(req);
       if (!token) {
         return res.status(401).json({ success: false, error: 'No token provided' });
       }
 
-      const session = authStore.validateSession(token);
+      const session = await authStore.validateSessionAsync(token);
       if (!session.isValid || !session.user) {
         return res.status(401).json({ success: false, error: 'Invalid or expired session' });
       }
@@ -344,14 +353,14 @@ export class AuthController {
     return res.json({ success: true, message: 'Logged out successfully' });
   }
 
-  public static updatePhone(req: Request, res: Response) {
+  public static async updatePhone(req: Request, res: Response) {
     try {
       const token = getBearerToken(req);
       if (!token) {
         return res.status(401).json({ success: false, error: 'Authentication token is required' });
       }
 
-      const session = authStore.validateSession(token);
+      const session = await authStore.validateSessionAsync(token);
       if (!session.isValid || !session.user) {
         return res.status(401).json({ success: false, error: 'Session expired' });
       }

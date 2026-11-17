@@ -1,24 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Compass,
   ArrowRight,
-  TrendingUp,
-  Truck,
-  ShieldCheck,
-  AlertTriangle,
   Calculator,
-  Percent,
   MapPin,
+  RefreshCw,
 } from 'lucide-react';
 import { ArbitrageOpportunity } from '../types/krishi';
 import { SAMPLE_ARBITRAGE } from '../data/agriData';
+import { marketApi } from '../api/marketApi';
 
-export const ArbitrageRadar: React.FC = () => {
+export const ArbitrageRadar: React.FC<{ selectedDistrict?: string }> = ({ selectedDistrict = 'chitwan' }) => {
   const [filterType, setFilterType] = useState<'all' | 'cross_border' | 'domestic'>('all');
   const [truckCapacityKg, setTruckCapacityKg] = useState<number>(3000);
+  const [corridors, setCorridors] = useState<ArbitrageOpportunity[]>(SAMPLE_ARBITRAGE);
   const [selectedOpp, setSelectedOpp] = useState<ArbitrageOpportunity>(SAMPLE_ARBITRAGE[0]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const filteredOpps = SAMPLE_ARBITRAGE.filter(
+  useEffect(() => {
+    let cancelled = false;
+    setIsLoading(true);
+    marketApi
+      .getArbitrage(selectedDistrict)
+      .then((res) => {
+        if (!cancelled && res && Array.isArray(res.corridors) && res.corridors.length > 0) {
+          setCorridors(res.corridors);
+          setSelectedOpp(res.corridors[0]);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDistrict]);
+
+  const filteredOpps = corridors.filter(
     (op) => filterType === 'all' || op.type === filterType
   );
 
@@ -30,7 +49,7 @@ export const ArbitrageRadar: React.FC = () => {
     const totalCustoms = opp.customsCost * truckCapacityKg;
     const totalTripExpenses = procurementCost + totalTransport + totalSpoilage + totalCustoms;
     const netTripProfit = grossRevenue - totalTripExpenses;
-    const roi = (netTripProfit / totalTripExpenses) * 100;
+    const roi = totalTripExpenses > 0 ? (netTripProfit / totalTripExpenses) * 100 : 0;
 
     return {
       grossRevenue,
@@ -57,12 +76,13 @@ export const ArbitrageRadar: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-bold text-white font-mono">Geospatial Arbitrage Radar</h2>
-              <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-xs font-mono border border-emerald-800">
-                6 Border Mandis + 12 Domestic Corridors
+              <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 text-xs font-mono border border-emerald-800 flex items-center gap-1">
+                {isLoading && <RefreshCw className="w-3 h-3 animate-spin" />}
+                All 7 Provinces · Live Mandi Spreads
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              Real-time Indian Mandi Rates (Agmarknet 1.6x INR-NPR) & Freight Optimization
+              Live Kalimati Terminal Anchors & Nationwide Highway / Cross-Border Freight Economics
             </p>
           </div>
         </div>
@@ -75,7 +95,7 @@ export const ArbitrageRadar: React.FC = () => {
               filterType === 'all' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            All Corridors ({SAMPLE_ARBITRAGE.length})
+            All Corridors ({corridors.length})
           </button>
           <button
             onClick={() => setFilterType('cross_border')}
@@ -83,7 +103,7 @@ export const ArbitrageRadar: React.FC = () => {
               filterType === 'cross_border' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Cross-Border (India-Nepal)
+            Cross-Border Corridors
           </button>
           <button
             onClick={() => setFilterType('domestic')}
@@ -91,14 +111,13 @@ export const ArbitrageRadar: React.FC = () => {
               filterType === 'domestic' ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            Domestic Inter-District
+            Domestic Inter-Province
           </button>
         </div>
       </div>
 
-      {/* Main Grid: Opportunities List + Real-time Freight Trip Calculator */}
+      {/* Main Grid: Opportunities List + Freight Trip Calculator */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Opportunities List */}
         <div className="lg:col-span-2 space-y-3">
           {filteredOpps.map((opp, idx) => {
             const isSelected = selectedOpp.commodity === opp.commodity && selectedOpp.fromLocation === opp.fromLocation;

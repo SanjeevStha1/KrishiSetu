@@ -1,7 +1,9 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { AuthUser, Farm, FarmRecordItem } from '../../../shared/types/krishi';
 import { SmsService } from './smsService';
+import { DbStorageService } from './dbStorageService';
 
 export interface UserSession {
   token: string;
@@ -29,12 +31,22 @@ export class AuthStore {
   private users: Map<string, AuthUser> = new Map();
   private userByPhone: Map<string, string> = new Map();
   private sessions: Map<string, UserSession> = new Map();
+  private revokedTokens: Set<string> = new Set();
   private profiles: Map<string, FarmerProfile> = new Map();
   private farms: Map<string, Farm> = new Map();
   private farmRecords: Map<string, FarmRecordItem[]> = new Map();
 
+  private static getSessionSecret(): string {
+    const envSecret = (process.env.SESSION_SECRET || '').trim();
+    if (envSecret.length >= 16) return envSecret;
+    const dbSeed = (process.env.DATABASE_URL || '').trim();
+    const fallbackMaterial = dbSeed
+      ? `krishisetu-hmac:${dbSeed}`
+      : 'krishisetu-dev-session-secret-configure-in-env';
+    return crypto.createHash('sha256').update(fallbackMaterial).digest('hex');
+  }
+
   constructor() {
-    this.seedInitialDemoData();
     this.loadFromDisk();
   }
 
@@ -45,7 +57,8 @@ export class AuthStore {
         fs.mkdirSync(dataDir, { recursive: true });
       } catch (e) {}
     }
-    return path.join(dataDir, 'registered_users.json');
+    const filename = process.env.NODE_ENV === 'test' ? 'registered_users.test.json' : 'registered_users.json';
+    return path.join(dataDir, filename);
   }
 
   public saveToDisk() {
@@ -93,164 +106,19 @@ export class AuthStore {
     }
   }
 
-  private seedInitialDemoData() {
-    // 1. Account 1: Ram Bahadur Thapa (Chitwan)
-    const user1Id = 'usr_ram_chitwan_001';
-    const user1Phone = '+9779845012345';
-    const user1: AuthUser = {
-      id: user1Id,
-      name: 'Ram Bahadur Thapa',
-      phone: user1Phone,
-      district: 'chitwan',
-      municipality: 'Bharatpur-11',
-      ward: '11',
-      locality: 'Bhojad Green Valley',
-      landSize: 4.5,
-      landUnit: 'ropani',
-      primaryCrops: ['tomato', 'cauliflower', 'potato'],
-      preferredLanguage: 'ne',
-      isRegistered: true,
-      status: 'active',
-      created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-    };
-    this.users.set(user1Id, user1);
-    this.userByPhone.set(user1Phone, user1Id);
-    this.profiles.set(user1Id, {
-      id: 'prof_ram_001',
-      userId: user1Id,
-      fullName: 'Ram Bahadur Thapa',
-      preferredLanguage: 'ne',
-      province: 'Bagmati',
-      district: 'chitwan',
-      municipality: 'Bharatpur-11',
-      ward: '11',
-      locality: 'Bhojad Green Valley',
-      profileCompletionPct: 100,
-      createdAt: new Date(Date.now() - 30 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    this.farms.set(user1Id, {
-      id: 'farm_ram_001',
-      farmer_id: user1Id,
-      farm_name: 'Thapa Organic Vegetable Farm',
-      land_size: 4.5,
-      land_unit: 'ropani',
-      land_size_ropani_eqv: 4.5,
-      soil_type: 'Alluvial Loam / बलौटे दोमट',
-      irrigation_type: 'Borewell Drip / थोपा सिँचाइ',
-      primary_crops: ['tomato', 'cauliflower', 'potato'],
-      created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-
-    // 2. Account 2: Sita Devi Adhikari (Dhading)
-    const user2Id = 'usr_sita_dhading_002';
-    const user2Phone = '+9779801234567';
-    const user2: AuthUser = {
-      id: user2Id,
-      name: 'Sita Devi Adhikari',
-      phone: user2Phone,
-      district: 'dhading',
-      municipality: 'Benighat Rorang-03',
-      ward: '3',
-      locality: 'Malekhu Corridor',
-      landSize: 6.0,
-      landUnit: 'ropani',
-      primaryCrops: ['cabbage', 'ginger', 'tomato'],
-      preferredLanguage: 'ne',
-      isRegistered: true,
-      status: 'active',
-      created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-    };
-    this.users.set(user2Id, user2);
-    this.userByPhone.set(user2Phone, user2Id);
-    this.profiles.set(user2Id, {
-      id: 'prof_sita_002',
-      userId: user2Id,
-      fullName: 'Sita Devi Adhikari',
-      preferredLanguage: 'ne',
-      province: 'Bagmati',
-      district: 'dhading',
-      municipality: 'Benighat Rorang-03',
-      ward: '3',
-      locality: 'Malekhu Corridor',
-      profileCompletionPct: 100,
-      createdAt: new Date(Date.now() - 20 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    this.farms.set(user2Id, {
-      id: 'farm_sita_002',
-      farmer_id: user2Id,
-      farm_name: 'Adhikari Hillside Agro Farm',
-      land_size: 6.0,
-      land_unit: 'ropani',
-      land_size_ropani_eqv: 6.0,
-      soil_type: 'Clay Loam / रातो पाङ्गो माटो',
-      irrigation_type: 'River Lift & Sprinkler / त्रिशूली लिफ्ट सिँचाइ',
-      primary_crops: ['cabbage', 'ginger', 'tomato'],
-      created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-
-    // 3. Account 3: Bikram Shrestha (Kavre)
-    const user3Id = 'usr_bikram_kavre_003';
-    const user3Phone = '+9779812345678';
-    const user3: AuthUser = {
-      id: user3Id,
-      name: 'Bikram Shrestha',
-      phone: user3Phone,
-      district: 'kavre',
-      municipality: 'Panauti-04',
-      ward: '4',
-      locality: 'Subbagaun Valley',
-      landSize: 3.2,
-      landUnit: 'ropani',
-      primaryCrops: ['potato', 'onion', 'capsicum'],
-      preferredLanguage: 'ne',
-      isRegistered: true,
-      status: 'active',
-      created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-    };
-    this.users.set(user3Id, user3);
-    this.userByPhone.set(user3Phone, user3Id);
-    this.profiles.set(user3Id, {
-      id: 'prof_bikram_003',
-      userId: user3Id,
-      fullName: 'Bikram Shrestha',
-      preferredLanguage: 'ne',
-      province: 'Bagmati',
-      district: 'kavre',
-      municipality: 'Panauti-04',
-      ward: '4',
-      locality: 'Subbagaun Valley',
-      profileCompletionPct: 100,
-      createdAt: new Date(Date.now() - 15 * 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    this.farms.set(user3Id, {
-      id: 'farm_bikram_003',
-      farmer_id: user3Id,
-      farm_name: 'Panauti Valley Fresh Produce',
-      land_size: 3.2,
-      land_unit: 'ropani',
-      land_size_ropani_eqv: 3.2,
-      soil_type: 'Mountain Silt / पहाडी कालो माटो',
-      irrigation_type: 'Canal Gravity Flow / कुलो सिँचाइ',
-      primary_crops: ['potato', 'onion', 'capsicum'],
-      created_at: new Date(Date.now() - 15 * 86400000).toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  }
 
   public normalizePhone(rawPhone: string): string {
-    const digits = rawPhone.replace(/\D/g, '');
+    const digits = (rawPhone || '').replace(/\D/g, '');
     if (digits.startsWith('977') && digits.length === 13) {
       return `+${digits}`;
     }
-    if (digits.length === 10 && (digits.startsWith('98') || digits.startsWith('97'))) {
-      return `+977${digits}`;
+    if (digits.startsWith('0') && digits.length === 11) {
+      return `+977${digits.slice(1)}`;
     }
-    return `+977${digits.slice(-10)}`;
+    if (digits.length >= 10) {
+      return `+977${digits.slice(-10)}`;
+    }
+    return `+977${digits}`;
   }
 
   public async generateAndSendOtp(phone: string, intent: 'login' | 'register' | 'change_phone' = 'login') {
@@ -259,8 +127,9 @@ export class AuthStore {
     return {
       success: true,
       normalizedPhone: normalized,
-      message: `OTP sent to ${normalized}`,
-      devOtp: process.env.NODE_ENV !== 'production' ? smsRes.code : undefined,
+      message: smsRes.message,
+      simulated: smsRes.simulated,
+      devOtp: process.env.NODE_ENV !== 'production' && smsRes.simulated ? smsRes.code : undefined,
       carrier: smsRes.carrier,
     };
   }
@@ -278,6 +147,7 @@ export class AuthStore {
     if (!rawPhone) return null;
     const digits = rawPhone.replace(/\D/g, '');
     const last10 = digits.slice(-10);
+    if (last10.length < 10) return null;
     const normalized = this.normalizePhone(rawPhone);
 
     // 1. Direct lookup
@@ -286,17 +156,82 @@ export class AuthStore {
       return this.users.get(userId)!;
     }
 
-    // 2. Scan all users matching last 10 digits
-    if (last10.length >= 7) {
-      for (const user of this.users.values()) {
-        const uDigits = user.phone.replace(/\D/g, '');
-        if (uDigits.endsWith(last10) || (user.normalizedPhone && user.normalizedPhone.replace(/\D/g, '').endsWith(last10))) {
-          return user;
-        }
+    // 2. Scan all users matching exact last 10 digits
+    for (const user of this.users.values()) {
+      const uDigits = (user.phone || '').replace(/\D/g, '');
+      const uNormDigits = (user.normalizedPhone || '').replace(/\D/g, '');
+      if (
+        (uDigits.length >= 10 && uDigits.endsWith(last10)) ||
+        (uNormDigits.length >= 10 && uNormDigits.endsWith(last10))
+      ) {
+        return user;
       }
     }
 
     return null;
+  }
+
+  public async findUserByPhoneAsync(rawPhone: string): Promise<AuthUser | null> {
+    const cached = this.findUserByPhone(rawPhone);
+    if (cached) return cached;
+
+    const dbUser = await DbStorageService.getUserByPhone(rawPhone);
+    if (dbUser) {
+      this.hydrateUserFromDb(dbUser);
+      return dbUser;
+    }
+    return null;
+  }
+
+  public async getUserAsync(userId: string): Promise<AuthUser | null> {
+    const cached = this.users.get(userId);
+    if (cached) return cached;
+
+    const dbUser = await DbStorageService.getUserByUid(userId);
+    if (dbUser) {
+      this.hydrateUserFromDb(dbUser);
+      return dbUser;
+    }
+    return null;
+  }
+
+  private hydrateUserFromDb(user: AuthUser) {
+    this.users.set(user.id, user);
+    if (user.phone) {
+      this.userByPhone.set(user.phone, user.id);
+      this.userByPhone.set(this.normalizePhone(user.phone), user.id);
+    }
+    if (!this.profiles.has(user.id)) {
+      this.profiles.set(user.id, {
+        id: `prof_${user.id}`,
+        userId: user.id,
+        fullName: user.name,
+        preferredLanguage: user.preferredLanguage || 'ne',
+        province: user.province || 'Bagmati',
+        district: user.district || 'chitwan',
+        municipality: user.municipality || '',
+        ward: user.ward || '1',
+        locality: user.locality || '',
+        profileCompletionPct: 100,
+        createdAt: user.created_at || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    if (!this.farms.has(user.id)) {
+      this.farms.set(user.id, {
+        id: `farm_${user.id}`,
+        farmer_id: user.id,
+        farm_name: user.farmName || `${user.name}'s Agro Farm`,
+        land_size: user.landSize || 2.0,
+        land_unit: user.landUnit || 'ropani',
+        land_size_ropani_eqv: user.landSize || 2.0,
+        soil_type: 'Alluvial Loam / दोमट माटो',
+        irrigation_type: 'Drip / थोपा सिँचाइ',
+        primary_crops: user.primaryCrops || ['tomato', 'potato'],
+        created_at: user.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+    }
   }
 
   public isPhoneRegistered(rawPhone: string): boolean {
@@ -389,6 +324,11 @@ export class AuthStore {
     this.farmRecords.set(userId, []);
 
     this.saveToDisk();
+
+    // Persist to Cloud SQL
+    DbStorageService.upsertUser(newUser).catch((e) =>
+      console.warn('[AuthStore] Cloud SQL user sync error:', e?.message)
+    );
 
     const token = this.createSession(userId);
     return { user: newUser, token, profile, farm };
@@ -498,6 +438,11 @@ export class AuthStore {
     };
     this.farms.set(userId, farm);
 
+    this.saveToDisk();
+    DbStorageService.upsertUser(user).catch((e) =>
+      console.warn('[AuthStore] Cloud SQL completeFarmerProfile sync error:', e?.message)
+    );
+
     return { user, profile, farm };
   }
 
@@ -512,38 +457,126 @@ export class AuthStore {
 
     this.userByPhone.delete(user.phone);
     user.phone = newNormalizedPhone;
+    user.normalizedPhone = newNormalizedPhone;
     this.userByPhone.set(newNormalizedPhone, userId);
+
+    this.saveToDisk();
+    DbStorageService.upsertUser(user).catch((e) =>
+      console.warn('[AuthStore] Cloud SQL updatePhoneNumber sync error:', e?.message)
+    );
 
     return { success: true, user };
   }
 
   public createSession(userId: string): string {
-    const token = `kst_${Date.now()}_${Math.random().toString(36).substring(2, 12)}`;
-    const expiresAt = Date.now() + 30 * 86400000; // 30 days
+    const iat = Date.now();
+    const expiresAt = iat + 30 * 86400000; // 30 days
+    const payload = Buffer.from(JSON.stringify({ uid: userId, iat, exp: expiresAt })).toString('base64url');
+    const sig = crypto
+      .createHmac('sha256', AuthStore.getSessionSecret())
+      .update(payload)
+      .digest('base64url');
+    const token = `kst2.${payload}.${sig}`;
+
     this.sessions.set(token, {
       token,
       userId,
-      createdAt: Date.now(),
+      createdAt: iat,
       expiresAt,
     });
     return token;
   }
 
+  private verifySignedToken(token: string): { valid: boolean; userId?: string; expiresAt?: number } {
+    if (!token || !token.startsWith('kst2.')) return { valid: false };
+    const parts = token.split('.');
+    if (parts.length !== 3) return { valid: false };
+    const [, payloadB64, providedSig] = parts;
+    if (!payloadB64 || !providedSig) return { valid: false };
+
+    const expectedSig = crypto
+      .createHmac('sha256', AuthStore.getSessionSecret())
+      .update(payloadB64)
+      .digest('base64url');
+
+    const providedBuf = Buffer.from(providedSig, 'utf8');
+    const expectedBuf = Buffer.from(expectedSig, 'utf8');
+    if (providedBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(providedBuf, expectedBuf)) {
+      return { valid: false };
+    }
+
+    try {
+      const parsed = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+      if (!parsed?.uid || typeof parsed.exp !== 'number' || Date.now() > parsed.exp) {
+        return { valid: false };
+      }
+      return { valid: true, userId: String(parsed.uid), expiresAt: parsed.exp };
+    } catch {
+      return { valid: false };
+    }
+  }
+
   public validateSession(token: string) {
-    const session = this.sessions.get(token);
-    if (!session) return { isValid: false, user: null, profile: null, farm: null };
-    if (Date.now() > session.expiresAt) {
-      this.sessions.delete(token);
+    if (!token || this.revokedTokens.has(token)) {
       return { isValid: false, user: null, profile: null, farm: null };
     }
-    const user = this.users.get(session.userId) || null;
-    const profile = this.profiles.get(session.userId) || null;
-    const farm = this.farms.get(session.userId) || null;
+
+    let resolvedUserId: string | null = null;
+    const session = this.sessions.get(token);
+    if (session) {
+      if (Date.now() > session.expiresAt) {
+        this.sessions.delete(token);
+        return { isValid: false, user: null, profile: null, farm: null };
+      }
+      resolvedUserId = session.userId;
+    } else {
+      const signed = this.verifySignedToken(token);
+      if (!signed.valid || !signed.userId) {
+        return { isValid: false, user: null, profile: null, farm: null };
+      }
+      resolvedUserId = signed.userId;
+    }
+
+    const user = this.users.get(resolvedUserId) || null;
+    if (!user) {
+      return { isValid: false, user: null, profile: null, farm: null };
+    }
+    const profile = this.profiles.get(resolvedUserId) || null;
+    const farm = this.farms.get(resolvedUserId) || null;
     return { isValid: true, user, profile, farm };
   }
 
+  public async validateSessionAsync(token: string) {
+    const syncRes = this.validateSession(token);
+    if (syncRes.isValid && syncRes.user) return syncRes;
+
+    if (!token || this.revokedTokens.has(token)) {
+      return { isValid: false, user: null, profile: null, farm: null };
+    }
+
+    const signed = this.verifySignedToken(token);
+    if (!signed.valid || !signed.userId) {
+      return { isValid: false, user: null, profile: null, farm: null };
+    }
+
+    const hydratedUser = await this.getUserAsync(signed.userId);
+    if (!hydratedUser) {
+      return { isValid: false, user: null, profile: null, farm: null };
+    }
+
+    return {
+      isValid: true,
+      user: hydratedUser,
+      profile: this.profiles.get(hydratedUser.id) || null,
+      farm: this.farms.get(hydratedUser.id) || null,
+    };
+  }
+
   public invalidateSession(token: string) {
-    this.sessions.delete(token);
+    if (token) {
+      this.revokedTokens.add(token);
+      this.sessions.delete(token);
+    }
   }
 
   public getUserFarmRecords(userId: string): FarmRecordItem[] {

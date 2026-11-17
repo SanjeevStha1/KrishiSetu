@@ -599,7 +599,7 @@
       "source": "live"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-08-27",
       "price": 160,
       "minPrice": 147,
@@ -607,7 +607,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-08-28",
       "price": 165,
       "minPrice": 152,
@@ -615,7 +615,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-08-29",
       "price": 168,
       "minPrice": 155,
@@ -623,7 +623,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-08-30",
       "price": 170,
       "minPrice": 156,
@@ -631,7 +631,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-08-31",
       "price": 168,
       "minPrice": 155,
@@ -639,7 +639,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-01",
       "price": 164,
       "minPrice": 151,
@@ -647,7 +647,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-02",
       "price": 160,
       "minPrice": 147,
@@ -655,7 +655,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-03",
       "price": 158,
       "minPrice": 145,
@@ -663,7 +663,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-04",
       "price": 159,
       "minPrice": 146,
@@ -671,7 +671,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-05",
       "price": 163,
       "minPrice": 150,
@@ -679,7 +679,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-06",
       "price": 168,
       "minPrice": 155,
@@ -687,7 +687,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-07",
       "price": 172,
       "minPrice": 158,
@@ -695,7 +695,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-08",
       "price": 173,
       "minPrice": 159,
@@ -703,7 +703,7 @@
       "source": "fallback"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-09",
       "price": 167,
       "minPrice": 154,
@@ -711,14 +711,2286 @@
       "source": "live"
     },
     {
-      "cropId": "green_chilli",
+      "cropId": "chilli",
       "date": "2026-09-10",
       "price": 65,
       "minPrice": 60,
       "maxPrice": 70,
       "source": "live"
+    },
+    {
+      "cropId": "tomato",
+      "date": "2026-11-15",
+      "price": 16,
+      "minPrice": 12,
+      "maxPrice": 25,
+      "source": "live"
+    },
+    {
+      "cropId": "potato",
+      "date": "2026-11-15",
+      "price": 58,
+      "minPrice": 55,
+      "maxPrice": 60,
+      "source": "live"
+    },
+    {
+      "cropId": "cauliflower",
+      "date": "2026-11-15",
+      "price": 24,
+      "minPrice": 20,
+      "maxPrice": 30,
+      "source": "live"
+    },
+    {
+      "cropId": "cabbage",
+      "date": "2026-11-15",
+      "price": 28,
+      "minPrice": 25,
+      "maxPrice": 30,
+      "source": "live"
+    },
+    {
+      "cropId": "onion",
+      "date": "2026-11-15",
+      "price": 90,
+      "minPrice": 88,
+      "maxPrice": 92,
+      "source": "live"
+    },
+    {
+      "cropId": "chilli",
+      "date": "2026-11-15",
+      "price": 95,
+      "minPrice": 90,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-01",
+      "price": 115,
+      "minPrice": 104,
+      "maxPrice": 126,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-02",
+      "price": 117,
+      "minPrice": 106,
+      "maxPrice": 128,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-03",
+      "price": 117,
+      "minPrice": 106,
+      "maxPrice": 128,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-04",
+      "price": 116,
+      "minPrice": 105,
+      "maxPrice": 127,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-05",
+      "price": 113,
+      "minPrice": 102,
+      "maxPrice": 124,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-06",
+      "price": 110,
+      "minPrice": 99,
+      "maxPrice": 121,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-07",
+      "price": 107,
+      "minPrice": 96,
+      "maxPrice": 118,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-08",
+      "price": 106,
+      "minPrice": 95,
+      "maxPrice": 117,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-09",
+      "price": 108,
+      "minPrice": 97,
+      "maxPrice": 119,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-10",
+      "price": 110,
+      "minPrice": 99,
+      "maxPrice": 121,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-11",
+      "price": 113,
+      "minPrice": 102,
+      "maxPrice": 124,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-12",
+      "price": 115,
+      "minPrice": 104,
+      "maxPrice": 126,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-13",
+      "price": 115,
+      "minPrice": 104,
+      "maxPrice": 126,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-14",
+      "price": 113,
+      "minPrice": 102,
+      "maxPrice": 124,
+      "source": "fallback"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-15",
+      "price": 85,
+      "minPrice": 80,
+      "maxPrice": 90,
+      "source": "live"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-01",
+      "price": 66,
+      "minPrice": 59,
+      "maxPrice": 73,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-02",
+      "price": 68,
+      "minPrice": 61,
+      "maxPrice": 75,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-03",
+      "price": 69,
+      "minPrice": 62,
+      "maxPrice": 76,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-04",
+      "price": 68,
+      "minPrice": 61,
+      "maxPrice": 75,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-05",
+      "price": 67,
+      "minPrice": 60,
+      "maxPrice": 74,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-06",
+      "price": 65,
+      "minPrice": 58,
+      "maxPrice": 72,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-07",
+      "price": 64,
+      "minPrice": 57,
+      "maxPrice": 71,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-08",
+      "price": 64,
+      "minPrice": 57,
+      "maxPrice": 71,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-09",
+      "price": 65,
+      "minPrice": 58,
+      "maxPrice": 72,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-10",
+      "price": 67,
+      "minPrice": 60,
+      "maxPrice": 74,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-11",
+      "price": 69,
+      "minPrice": 62,
+      "maxPrice": 76,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-12",
+      "price": 70,
+      "minPrice": 63,
+      "maxPrice": 77,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-13",
+      "price": 71,
+      "minPrice": 64,
+      "maxPrice": 78,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-14",
+      "price": 70,
+      "minPrice": 63,
+      "maxPrice": 77,
+      "source": "fallback"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-15",
+      "price": 135,
+      "minPrice": 120,
+      "maxPrice": 150,
+      "source": "live"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-01",
+      "price": 95,
+      "minPrice": 81,
+      "maxPrice": 109,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-02",
+      "price": 97,
+      "minPrice": 83,
+      "maxPrice": 111,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-03",
+      "price": 98,
+      "minPrice": 84,
+      "maxPrice": 112,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-04",
+      "price": 97,
+      "minPrice": 83,
+      "maxPrice": 111,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-05",
+      "price": 94,
+      "minPrice": 80,
+      "maxPrice": 108,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-06",
+      "price": 91,
+      "minPrice": 77,
+      "maxPrice": 105,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-07",
+      "price": 88,
+      "minPrice": 74,
+      "maxPrice": 102,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-08",
+      "price": 87,
+      "minPrice": 73,
+      "maxPrice": 101,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-09",
+      "price": 88,
+      "minPrice": 74,
+      "maxPrice": 102,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-10",
+      "price": 91,
+      "minPrice": 77,
+      "maxPrice": 105,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-11",
+      "price": 93,
+      "minPrice": 79,
+      "maxPrice": 107,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-12",
+      "price": 95,
+      "minPrice": 81,
+      "maxPrice": 109,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-13",
+      "price": 95,
+      "minPrice": 81,
+      "maxPrice": 109,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-14",
+      "price": 93,
+      "minPrice": 79,
+      "maxPrice": 107,
+      "source": "fallback"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-15",
+      "price": 65,
+      "minPrice": 60,
+      "maxPrice": 70,
+      "source": "live"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-01",
+      "price": 230,
+      "minPrice": 220,
+      "maxPrice": 240,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-02",
+      "price": 226,
+      "minPrice": 216,
+      "maxPrice": 236,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-03",
+      "price": 221,
+      "minPrice": 211,
+      "maxPrice": 231,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-04",
+      "price": 214,
+      "minPrice": 204,
+      "maxPrice": 224,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-05",
+      "price": 205,
+      "minPrice": 195,
+      "maxPrice": 215,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-06",
+      "price": 196,
+      "minPrice": 186,
+      "maxPrice": 206,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-07",
+      "price": 188,
+      "minPrice": 178,
+      "maxPrice": 198,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-08",
+      "price": 181,
+      "minPrice": 171,
+      "maxPrice": 191,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-09",
+      "price": 176,
+      "minPrice": 166,
+      "maxPrice": 186,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-10",
+      "price": 172,
+      "minPrice": 162,
+      "maxPrice": 182,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-11",
+      "price": 169,
+      "minPrice": 159,
+      "maxPrice": 179,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-12",
+      "price": 165,
+      "minPrice": 155,
+      "maxPrice": 175,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-13",
+      "price": 159,
+      "minPrice": 149,
+      "maxPrice": 169,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-14",
+      "price": 151,
+      "minPrice": 141,
+      "maxPrice": 161,
+      "source": "fallback"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-15",
+      "price": 112,
+      "minPrice": 100,
+      "maxPrice": 130,
+      "source": "live"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-01",
+      "price": 74,
+      "minPrice": 65,
+      "maxPrice": 83,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-02",
+      "price": 78,
+      "minPrice": 69,
+      "maxPrice": 87,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-03",
+      "price": 80,
+      "minPrice": 71,
+      "maxPrice": 89,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-04",
+      "price": 81,
+      "minPrice": 72,
+      "maxPrice": 90,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-05",
+      "price": 80,
+      "minPrice": 71,
+      "maxPrice": 89,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-06",
+      "price": 79,
+      "minPrice": 70,
+      "maxPrice": 88,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-07",
+      "price": 79,
+      "minPrice": 70,
+      "maxPrice": 88,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-08",
+      "price": 80,
+      "minPrice": 71,
+      "maxPrice": 89,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-09",
+      "price": 83,
+      "minPrice": 74,
+      "maxPrice": 92,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-10",
+      "price": 86,
+      "minPrice": 77,
+      "maxPrice": 95,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-11",
+      "price": 90,
+      "minPrice": 81,
+      "maxPrice": 99,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-12",
+      "price": 94,
+      "minPrice": 85,
+      "maxPrice": 103,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-13",
+      "price": 95,
+      "minPrice": 86,
+      "maxPrice": 104,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-14",
+      "price": 95,
+      "minPrice": 86,
+      "maxPrice": 104,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-15",
+      "price": 86,
+      "minPrice": 80,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-01",
+      "price": 54,
+      "minPrice": 46,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-02",
+      "price": 55,
+      "minPrice": 47,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-03",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-04",
+      "price": 55,
+      "minPrice": 47,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-05",
+      "price": 54,
+      "minPrice": 46,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-06",
+      "price": 52,
+      "minPrice": 44,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-07",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-08",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-09",
+      "price": 52,
+      "minPrice": 44,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-10",
+      "price": 53,
+      "minPrice": 45,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-11",
+      "price": 55,
+      "minPrice": 47,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-12",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-13",
+      "price": 57,
+      "minPrice": 49,
+      "maxPrice": 65,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-14",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-15",
+      "price": 45,
+      "minPrice": 40,
+      "maxPrice": 50,
+      "source": "live"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-01",
+      "price": 58,
+      "minPrice": 52,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-02",
+      "price": 59,
+      "minPrice": 53,
+      "maxPrice": 65,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-03",
+      "price": 59,
+      "minPrice": 53,
+      "maxPrice": 65,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-04",
+      "price": 58,
+      "minPrice": 52,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-05",
+      "price": 56,
+      "minPrice": 50,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-06",
+      "price": 54,
+      "minPrice": 48,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-07",
+      "price": 53,
+      "minPrice": 47,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-08",
+      "price": 52,
+      "minPrice": 46,
+      "maxPrice": 58,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-09",
+      "price": 53,
+      "minPrice": 47,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-10",
+      "price": 54,
+      "minPrice": 48,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-11",
+      "price": 55,
+      "minPrice": 49,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-12",
+      "price": 56,
+      "minPrice": 50,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-13",
+      "price": 56,
+      "minPrice": 50,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-14",
+      "price": 55,
+      "minPrice": 49,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-15",
+      "price": 30,
+      "minPrice": 25,
+      "maxPrice": 35,
+      "source": "live"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-01",
+      "price": 213,
+      "minPrice": 185,
+      "maxPrice": 241,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-02",
+      "price": 215,
+      "minPrice": 187,
+      "maxPrice": 243,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-03",
+      "price": 214,
+      "minPrice": 186,
+      "maxPrice": 242,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-04",
+      "price": 209,
+      "minPrice": 181,
+      "maxPrice": 237,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-05",
+      "price": 202,
+      "minPrice": 174,
+      "maxPrice": 230,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-06",
+      "price": 194,
+      "minPrice": 166,
+      "maxPrice": 222,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-07",
+      "price": 187,
+      "minPrice": 159,
+      "maxPrice": 215,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-08",
+      "price": 183,
+      "minPrice": 155,
+      "maxPrice": 211,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-09",
+      "price": 184,
+      "minPrice": 156,
+      "maxPrice": 212,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-10",
+      "price": 186,
+      "minPrice": 158,
+      "maxPrice": 214,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-11",
+      "price": 189,
+      "minPrice": 161,
+      "maxPrice": 217,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-12",
+      "price": 190,
+      "minPrice": 162,
+      "maxPrice": 218,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-13",
+      "price": 188,
+      "minPrice": 160,
+      "maxPrice": 216,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-14",
+      "price": 182,
+      "minPrice": 154,
+      "maxPrice": 210,
+      "source": "fallback"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-15",
+      "price": 125,
+      "minPrice": 100,
+      "maxPrice": 150,
+      "source": "live"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-01",
+      "price": 62,
+      "minPrice": 48,
+      "maxPrice": 76,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-02",
+      "price": 64,
+      "minPrice": 50,
+      "maxPrice": 78,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-03",
+      "price": 65,
+      "minPrice": 51,
+      "maxPrice": 79,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-04",
+      "price": 65,
+      "minPrice": 51,
+      "maxPrice": 79,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-05",
+      "price": 63,
+      "minPrice": 49,
+      "maxPrice": 77,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-06",
+      "price": 62,
+      "minPrice": 48,
+      "maxPrice": 76,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-07",
+      "price": 60,
+      "minPrice": 46,
+      "maxPrice": 74,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-08",
+      "price": 60,
+      "minPrice": 46,
+      "maxPrice": 74,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-09",
+      "price": 62,
+      "minPrice": 48,
+      "maxPrice": 76,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-10",
+      "price": 64,
+      "minPrice": 50,
+      "maxPrice": 78,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-11",
+      "price": 67,
+      "minPrice": 53,
+      "maxPrice": 81,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-12",
+      "price": 68,
+      "minPrice": 54,
+      "maxPrice": 82,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-13",
+      "price": 69,
+      "minPrice": 55,
+      "maxPrice": 83,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-14",
+      "price": 68,
+      "minPrice": 54,
+      "maxPrice": 82,
+      "source": "fallback"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-15",
+      "price": 70,
+      "minPrice": 60,
+      "maxPrice": 80,
+      "source": "live"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-01",
+      "price": 221,
+      "minPrice": 190,
+      "maxPrice": 252,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-02",
+      "price": 227,
+      "minPrice": 196,
+      "maxPrice": 258,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-03",
+      "price": 229,
+      "minPrice": 198,
+      "maxPrice": 260,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-04",
+      "price": 227,
+      "minPrice": 196,
+      "maxPrice": 258,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-05",
+      "price": 222,
+      "minPrice": 191,
+      "maxPrice": 253,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-06",
+      "price": 215,
+      "minPrice": 184,
+      "maxPrice": 246,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-07",
+      "price": 210,
+      "minPrice": 179,
+      "maxPrice": 241,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-08",
+      "price": 210,
+      "minPrice": 179,
+      "maxPrice": 241,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-09",
+      "price": 214,
+      "minPrice": 183,
+      "maxPrice": 245,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-10",
+      "price": 221,
+      "minPrice": 190,
+      "maxPrice": 252,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-11",
+      "price": 228,
+      "minPrice": 197,
+      "maxPrice": 259,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-12",
+      "price": 233,
+      "minPrice": 202,
+      "maxPrice": 264,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-13",
+      "price": 234,
+      "minPrice": 203,
+      "maxPrice": 265,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-14",
+      "price": 231,
+      "minPrice": 200,
+      "maxPrice": 262,
+      "source": "fallback"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-15",
+      "price": 245,
+      "minPrice": 230,
+      "maxPrice": 260,
+      "source": "live"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-01",
+      "price": 106,
+      "minPrice": 85,
+      "maxPrice": 127,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-02",
+      "price": 108,
+      "minPrice": 87,
+      "maxPrice": 129,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-03",
+      "price": 108,
+      "minPrice": 87,
+      "maxPrice": 129,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-04",
+      "price": 106,
+      "minPrice": 85,
+      "maxPrice": 127,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-05",
+      "price": 102,
+      "minPrice": 81,
+      "maxPrice": 123,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-06",
+      "price": 98,
+      "minPrice": 77,
+      "maxPrice": 119,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-07",
+      "price": 95,
+      "minPrice": 74,
+      "maxPrice": 116,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-08",
+      "price": 93,
+      "minPrice": 72,
+      "maxPrice": 114,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-09",
+      "price": 94,
+      "minPrice": 73,
+      "maxPrice": 115,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-10",
+      "price": 96,
+      "minPrice": 75,
+      "maxPrice": 117,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-11",
+      "price": 97,
+      "minPrice": 76,
+      "maxPrice": 118,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-12",
+      "price": 98,
+      "minPrice": 77,
+      "maxPrice": 119,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-13",
+      "price": 97,
+      "minPrice": 76,
+      "maxPrice": 118,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-14",
+      "price": 95,
+      "minPrice": 74,
+      "maxPrice": 116,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-15",
+      "price": 90,
+      "minPrice": 80,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-01",
+      "price": 80,
+      "minPrice": 71,
+      "maxPrice": 89,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-02",
+      "price": 83,
+      "minPrice": 74,
+      "maxPrice": 92,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-03",
+      "price": 85,
+      "minPrice": 76,
+      "maxPrice": 94,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-04",
+      "price": 85,
+      "minPrice": 76,
+      "maxPrice": 94,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-05",
+      "price": 84,
+      "minPrice": 75,
+      "maxPrice": 93,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-06",
+      "price": 82,
+      "minPrice": 73,
+      "maxPrice": 91,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-07",
+      "price": 81,
+      "minPrice": 72,
+      "maxPrice": 90,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-08",
+      "price": 81,
+      "minPrice": 72,
+      "maxPrice": 90,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-09",
+      "price": 84,
+      "minPrice": 75,
+      "maxPrice": 93,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-10",
+      "price": 87,
+      "minPrice": 78,
+      "maxPrice": 96,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-11",
+      "price": 90,
+      "minPrice": 81,
+      "maxPrice": 99,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-12",
+      "price": 93,
+      "minPrice": 84,
+      "maxPrice": 102,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-13",
+      "price": 94,
+      "minPrice": 85,
+      "maxPrice": 103,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-14",
+      "price": 93,
+      "minPrice": 84,
+      "maxPrice": 102,
+      "source": "fallback"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-15",
+      "price": 75,
+      "minPrice": 70,
+      "maxPrice": 80,
+      "source": "live"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-01",
+      "price": 314,
+      "minPrice": 278,
+      "maxPrice": 350,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-02",
+      "price": 320,
+      "minPrice": 284,
+      "maxPrice": 356,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-03",
+      "price": 321,
+      "minPrice": 285,
+      "maxPrice": 357,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-04",
+      "price": 316,
+      "minPrice": 280,
+      "maxPrice": 352,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-05",
+      "price": 307,
+      "minPrice": 271,
+      "maxPrice": 343,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-06",
+      "price": 296,
+      "minPrice": 260,
+      "maxPrice": 332,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-07",
+      "price": 288,
+      "minPrice": 252,
+      "maxPrice": 324,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-08",
+      "price": 285,
+      "minPrice": 249,
+      "maxPrice": 321,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-09",
+      "price": 288,
+      "minPrice": 252,
+      "maxPrice": 324,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-10",
+      "price": 296,
+      "minPrice": 260,
+      "maxPrice": 332,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-11",
+      "price": 303,
+      "minPrice": 267,
+      "maxPrice": 339,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-12",
+      "price": 308,
+      "minPrice": 272,
+      "maxPrice": 344,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-13",
+      "price": 307,
+      "minPrice": 271,
+      "maxPrice": 343,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-14",
+      "price": 301,
+      "minPrice": 265,
+      "maxPrice": 337,
+      "source": "fallback"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-15",
+      "price": 325,
+      "minPrice": 300,
+      "maxPrice": 350,
+      "source": "live"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-01",
+      "price": 50,
+      "minPrice": 44,
+      "maxPrice": 56,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-02",
+      "price": 50,
+      "minPrice": 44,
+      "maxPrice": 56,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-03",
+      "price": 50,
+      "minPrice": 44,
+      "maxPrice": 56,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-04",
+      "price": 49,
+      "minPrice": 43,
+      "maxPrice": 55,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-05",
+      "price": 47,
+      "minPrice": 41,
+      "maxPrice": 53,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-06",
+      "price": 45,
+      "minPrice": 39,
+      "maxPrice": 51,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-07",
+      "price": 44,
+      "minPrice": 38,
+      "maxPrice": 50,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-08",
+      "price": 43,
+      "minPrice": 37,
+      "maxPrice": 49,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-09",
+      "price": 43,
+      "minPrice": 37,
+      "maxPrice": 49,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-10",
+      "price": 44,
+      "minPrice": 38,
+      "maxPrice": 50,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-11",
+      "price": 45,
+      "minPrice": 39,
+      "maxPrice": 51,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-12",
+      "price": 45,
+      "minPrice": 39,
+      "maxPrice": 51,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-13",
+      "price": 45,
+      "minPrice": 39,
+      "maxPrice": 51,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-14",
+      "price": 43,
+      "minPrice": 37,
+      "maxPrice": 49,
+      "source": "fallback"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-15",
+      "price": 65,
+      "minPrice": 60,
+      "maxPrice": 70,
+      "source": "live"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-01",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-02",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-03",
+      "price": 56,
+      "minPrice": 48,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-04",
+      "price": 55,
+      "minPrice": 47,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-05",
+      "price": 53,
+      "minPrice": 45,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-06",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-07",
+      "price": 50,
+      "minPrice": 42,
+      "maxPrice": 58,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-08",
+      "price": 49,
+      "minPrice": 41,
+      "maxPrice": 57,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-09",
+      "price": 49,
+      "minPrice": 41,
+      "maxPrice": 57,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-10",
+      "price": 50,
+      "minPrice": 42,
+      "maxPrice": 58,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-11",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-12",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-13",
+      "price": 51,
+      "minPrice": 43,
+      "maxPrice": 59,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-14",
+      "price": 49,
+      "minPrice": 41,
+      "maxPrice": 57,
+      "source": "fallback"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-15",
+      "price": 25,
+      "minPrice": 20,
+      "maxPrice": 30,
+      "source": "live"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-01",
+      "price": 165,
+      "minPrice": 144,
+      "maxPrice": 186,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-02",
+      "price": 166,
+      "minPrice": 145,
+      "maxPrice": 187,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-03",
+      "price": 165,
+      "minPrice": 144,
+      "maxPrice": 186,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-04",
+      "price": 161,
+      "minPrice": 140,
+      "maxPrice": 182,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-05",
+      "price": 155,
+      "minPrice": 134,
+      "maxPrice": 176,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-06",
+      "price": 148,
+      "minPrice": 127,
+      "maxPrice": 169,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-07",
+      "price": 142,
+      "minPrice": 121,
+      "maxPrice": 163,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-08",
+      "price": 139,
+      "minPrice": 118,
+      "maxPrice": 160,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-09",
+      "price": 139,
+      "minPrice": 118,
+      "maxPrice": 160,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-10",
+      "price": 140,
+      "minPrice": 119,
+      "maxPrice": 161,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-11",
+      "price": 142,
+      "minPrice": 121,
+      "maxPrice": 163,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-12",
+      "price": 142,
+      "minPrice": 121,
+      "maxPrice": 163,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-13",
+      "price": 140,
+      "minPrice": 119,
+      "maxPrice": 161,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-14",
+      "price": 135,
+      "minPrice": 114,
+      "maxPrice": 156,
+      "source": "fallback"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-15",
+      "price": 100,
+      "minPrice": 80,
+      "maxPrice": 120,
+      "source": "live"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-01",
+      "price": 61,
+      "minPrice": 56,
+      "maxPrice": 66,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-02",
+      "price": 61,
+      "minPrice": 56,
+      "maxPrice": 66,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-03",
+      "price": 61,
+      "minPrice": 56,
+      "maxPrice": 66,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-04",
+      "price": 61,
+      "minPrice": 56,
+      "maxPrice": 66,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-05",
+      "price": 59,
+      "minPrice": 54,
+      "maxPrice": 64,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-06",
+      "price": 57,
+      "minPrice": 52,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-07",
+      "price": 56,
+      "minPrice": 51,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-08",
+      "price": 55,
+      "minPrice": 50,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-09",
+      "price": 55,
+      "minPrice": 50,
+      "maxPrice": 60,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-10",
+      "price": 56,
+      "minPrice": 51,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-11",
+      "price": 57,
+      "minPrice": 52,
+      "maxPrice": 62,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-12",
+      "price": 58,
+      "minPrice": 53,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-13",
+      "price": 58,
+      "minPrice": 53,
+      "maxPrice": 63,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-14",
+      "price": 56,
+      "minPrice": 51,
+      "maxPrice": 61,
+      "source": "fallback"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-15",
+      "price": 85,
+      "minPrice": 80,
+      "maxPrice": 90,
+      "source": "live"
+    },
+    {
+      "cropId": "tomato",
+      "date": "2026-11-16",
+      "price": 15,
+      "minPrice": 12,
+      "maxPrice": 20,
+      "source": "live"
+    },
+    {
+      "cropId": "potato",
+      "date": "2026-11-16",
+      "price": 58,
+      "minPrice": 55,
+      "maxPrice": 60,
+      "source": "live"
+    },
+    {
+      "cropId": "onion",
+      "date": "2026-11-16",
+      "price": 90,
+      "minPrice": 88,
+      "maxPrice": 92,
+      "source": "live"
+    },
+    {
+      "cropId": "cauliflower",
+      "date": "2026-11-16",
+      "price": 26,
+      "minPrice": 20,
+      "maxPrice": 30,
+      "source": "live"
+    },
+    {
+      "cropId": "cabbage",
+      "date": "2026-11-16",
+      "price": 29,
+      "minPrice": 25,
+      "maxPrice": 35,
+      "source": "live"
+    },
+    {
+      "cropId": "carrot",
+      "date": "2026-11-16",
+      "price": 85,
+      "minPrice": 80,
+      "maxPrice": 90,
+      "source": "live"
+    },
+    {
+      "cropId": "capsicum",
+      "date": "2026-11-16",
+      "price": 130,
+      "minPrice": 120,
+      "maxPrice": 150,
+      "source": "live"
+    },
+    {
+      "cropId": "beans",
+      "date": "2026-11-16",
+      "price": 65,
+      "minPrice": 60,
+      "maxPrice": 70,
+      "source": "live"
+    },
+    {
+      "cropId": "peas",
+      "date": "2026-11-16",
+      "price": 112,
+      "minPrice": 100,
+      "maxPrice": 130,
+      "source": "live"
+    },
+    {
+      "cropId": "bitter_gourd",
+      "date": "2026-11-16",
+      "price": 88,
+      "minPrice": 80,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "bottle_gourd",
+      "date": "2026-11-16",
+      "price": 45,
+      "minPrice": 40,
+      "maxPrice": 50,
+      "source": "live"
+    },
+    {
+      "cropId": "brinjal",
+      "date": "2026-11-16",
+      "price": 30,
+      "minPrice": 25,
+      "maxPrice": 35,
+      "source": "live"
+    },
+    {
+      "cropId": "chilli",
+      "date": "2026-11-16",
+      "price": 95,
+      "minPrice": 90,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "coriander",
+      "date": "2026-11-16",
+      "price": 125,
+      "minPrice": 100,
+      "maxPrice": 150,
+      "source": "live"
+    },
+    {
+      "cropId": "cucumber",
+      "date": "2026-11-16",
+      "price": 60,
+      "minPrice": 50,
+      "maxPrice": 70,
+      "source": "live"
+    },
+    {
+      "cropId": "garlic",
+      "date": "2026-11-16",
+      "price": 245,
+      "minPrice": 230,
+      "maxPrice": 260,
+      "source": "live"
+    },
+    {
+      "cropId": "ginger",
+      "date": "2026-11-16",
+      "price": 87,
+      "minPrice": 80,
+      "maxPrice": 100,
+      "source": "live"
+    },
+    {
+      "cropId": "ladies_finger",
+      "date": "2026-11-16",
+      "price": 75,
+      "minPrice": 70,
+      "maxPrice": 80,
+      "source": "live"
+    },
+    {
+      "cropId": "mushroom",
+      "date": "2026-11-16",
+      "price": 325,
+      "minPrice": 300,
+      "maxPrice": 350,
+      "source": "live"
+    },
+    {
+      "cropId": "pumpkin",
+      "date": "2026-11-16",
+      "price": 65,
+      "minPrice": 60,
+      "maxPrice": 70,
+      "source": "live"
+    },
+    {
+      "cropId": "radish",
+      "date": "2026-11-16",
+      "price": 25,
+      "minPrice": 20,
+      "maxPrice": 30,
+      "source": "live"
+    },
+    {
+      "cropId": "spinach",
+      "date": "2026-11-16",
+      "price": 100,
+      "minPrice": 80,
+      "maxPrice": 120,
+      "source": "live"
+    },
+    {
+      "cropId": "sweet_potato",
+      "date": "2026-11-16",
+      "price": 85,
+      "minPrice": 80,
+      "maxPrice": 90,
+      "source": "live"
     }
   ],
-  "totalRecords": 90,
-  "updatedAt": "2026-09-10T16:01:46.263Z"
+  "totalRecords": 374,
+  "updatedAt": "2026-11-16T07:43:04.360Z"
 }

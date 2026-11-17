@@ -338,40 +338,106 @@ export class AgriNewsFeedScraper {
       name: 'Ministry of Agriculture and Livestock Development',
       nameNe: 'कृषि तथा पशुपन्छी विकास मन्त्रालय',
       url: 'https://moald.gov.np',
-      feedUrl: 'https://moald.gov.np/notices/rss',
+      feedUrl: 'https://moald.gov.np',
     },
     {
       id: 'kfvmdb',
       name: 'Kalimati Fruits and Vegetable Market Board',
       nameNe: 'कालीमाटी फलफूल तथा तरकारी बजार विकास समिति',
       url: 'https://kalimatimarket.gov.np',
-      feedUrl: 'https://kalimatimarket.gov.np/daily-price-information',
-    },
-    {
-      id: 'narc',
-      name: 'Nepal Agricultural Research Council (NARC)',
-      nameNe: 'नेपाल कृषि अनुसन्धान परिषद्',
-      url: 'https://narc.gov.np',
-      feedUrl: 'https://narc.gov.np/feed/',
+      feedUrl: 'https://kalimatimarket.gov.np/price',
     },
     {
       id: 'dhm',
       name: 'Department of Hydrology and Meteorology',
       nameNe: 'जल तथा मौसम विज्ञान विभाग',
       url: 'https://dhm.gov.np',
-      feedUrl: 'https://dhm.gov.np/bulletin',
+      feedUrl: 'https://dhm.gov.np',
     },
     {
       id: 'sqcc',
       name: 'Seed Quality Control Centre',
       nameNe: 'बीउ विजन गुणस्तर नियन्त्रण केन्द्र',
       url: 'https://sqcc.gov.np',
-      feedUrl: 'https://sqcc.gov.np/notices',
+      feedUrl: 'https://sqcc.gov.np',
     }
   ];
 
+  private static extractLiveNotices(html: string, sourceMeta: { id: string; name: string; nameNe: string; url: string }): ScrapedNewsArticle[] {
+    const found: ScrapedNewsArticle[] = [];
+    const seenUrls = new Set<string>();
+    const linkRegex = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+    let m: RegExpExecArray | null;
+
+    while ((m = linkRegex.exec(html)) !== null && found.length < 2) {
+      const href = m[1].trim();
+      const rawText = m[2].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      if (!rawText || rawText.length < 24 || rawText.length > 180) continue;
+
+      const isContentLink =
+        href.includes('/content/') ||
+        href.includes('notice') ||
+        href.includes('bulletin') ||
+        href.includes('three-days-bulletin');
+      if (!isContentLink) continue;
+
+      const fullUrl = href.startsWith('http') ? href : `${sourceMeta.url.replace(/\/$/, '')}${href.startsWith('/') ? '' : '/'}${href}`;
+      if (seenUrls.has(fullUrl)) continue;
+      seenUrls.add(fullUrl);
+
+      const hasDevanagari = /[\u0900-\u097F]/.test(rawText);
+      const isWeather = rawText.toLowerCase().includes('weather') || rawText.includes('मौसम');
+      const isSeed = sourceMeta.id === 'sqcc' || rawText.includes('बीउ') || rawText.toLowerCase().includes('seed');
+
+      found.push({
+        id: `live-${sourceMeta.id}-${Buffer.from(fullUrl).toString('base64').slice(0, 12)}`,
+        title: hasDevanagari ? `${sourceMeta.name} Notice: ${rawText}` : rawText,
+        titleNe: hasDevanagari ? rawText : `${sourceMeta.nameNe} सूचना: ${rawText}`,
+        source: sourceMeta.name,
+        sourceNe: sourceMeta.nameNe,
+        sourceUrl: fullUrl,
+        sourceType: isWeather ? 'weather' : 'gov',
+        publishedAt: 'Live Official Portal',
+        publishedAtNe: 'प्रत्यक्ष सरकारी सूचना',
+        readTimeMin: 2,
+        category: isWeather ? 'weather' : isSeed ? 'research' : 'policy',
+        categoryLabelEn: isWeather ? 'Agro-Weather & Alerts' : isSeed ? 'Crop Technology & Seeds' : 'Official Gov Notice',
+        categoryLabelNe: isWeather ? 'मौसम र जलस्रोत' : isSeed ? 'बीउ विजन तथा प्रविधि' : 'आधिकारिक सरकारी सूचना',
+        province: 'All 7 Provinces',
+        imageUrl: isWeather
+          ? 'https://images.unsplash.com/photo-1514632595-4944383fa27c?w=800&auto=format&fit=crop&q=80'
+          : 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800&auto=format&fit=crop&q=80',
+        summaryEn: `Synced directly from ${sourceMeta.name} (${sourceMeta.url}). Click the official source link to read full circular.`,
+        summaryNe: `${sourceMeta.nameNe} (${sourceMeta.url}) बाट प्रत्यक्ष संकलित आधिकारिक सूचना।`,
+        contentEn: [
+          `Official notice retrieved directly from ${sourceMeta.name}: "${rawText}".`,
+          `Original official publication link: ${fullUrl}`,
+        ],
+        contentNe: [
+          `${sourceMeta.nameNe} को आधिकारिक पोर्टलबाट प्रत्यक्ष प्राप्त सूचना: "${rawText}"।`,
+          `पूरा विवरणको लागि आधिकारिक लिंक हेर्नुहोस्: ${fullUrl}`,
+        ],
+        keyTakeawaysEn: [
+          `Verified directly on ${sourceMeta.url}`,
+          'Applies to farmers, cooperatives, and agro-vets nationwide.',
+        ],
+        keyTakeawaysNe: [
+          `${sourceMeta.url} बाट प्रत्यक्ष प्रमाणित।`,
+          'देशभरका किसान तथा कृषि सहकारीका लागि उपयोगी।',
+        ],
+        impactedCrops: ['Tomato', 'Potato', 'Onion', 'Seasonal Crops'],
+        farmerActionEn: 'Review full official notice details on the government portal via the source link.',
+        farmerActionNe: 'आधिकारिक सरकारी पोर्टल लिंक खोली पूरा सूचना पढ्नुहोस्।',
+        verifiedOfficial: true,
+        featured: false,
+      });
+    }
+
+    return found;
+  }
+
   /**
-   * Scrapes or checks feed connectivity for external Nepali agricultural sources
+   * Scrapes live notices & checks feed connectivity for external Nepali agricultural sources
    */
   public static async checkAndSyncFeeds(): Promise<NewsSyncResponse> {
     if (this.isSyncing) {
@@ -381,12 +447,13 @@ export class AgriNewsFeedScraper {
     this.isSyncing = true;
     const now = new Date();
     const statuses: FeedSourceStatus[] = [];
+    const liveExtracted: ScrapedNewsArticle[] = [];
 
-    // Probe feeds with graceful timeout
     for (const source of this.FEED_SOURCES) {
       let status: 'online' | 'synced' | 'fallback_cached' = 'fallback_cached';
+      let matchedCount = 0;
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2800);
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
 
       try {
         const targetUrl = source.feedUrl || source.url;
@@ -394,7 +461,7 @@ export class AgriNewsFeedScraper {
           method: 'GET',
           signal: controller.signal,
           headers: {
-            'User-Agent': 'KrishiSetu-AgriScraper/2.4 (Nepal Agricultural Extension Crawler; +https://krishisetu.gov.np)',
+            'User-Agent': 'KrishiSetu-AgriScraper/3.0 (Nepal Agricultural Extension Crawler)',
             'Accept': 'application/rss+xml, application/xml, text/html;q=0.9, */*;q=0.8'
           }
         });
@@ -403,15 +470,21 @@ export class AgriNewsFeedScraper {
 
         if (res.ok) {
           status = 'online';
-          // Check if response contains XML RSS
           const text = await res.text();
-          if (text.includes('<rss') || text.includes('<feed') || text.includes('<item')) {
+          if (source.id === 'kfvmdb' && text.includes('<td')) {
             status = 'synced';
+            matchedCount = 1;
+          } else {
+            const extracted = this.extractLiveNotices(text, source);
+            if (extracted.length > 0) {
+              status = 'synced';
+              matchedCount = extracted.length;
+              liveExtracted.push(...extracted);
+            }
           }
         }
-      } catch (err) {
+      } catch {
         clearTimeout(timeoutId);
-        // Fallback to high-availability cached bulletins
         status = 'fallback_cached';
       }
 
@@ -423,9 +496,15 @@ export class AgriNewsFeedScraper {
         feedUrl: source.feedUrl,
         status,
         lastChecked: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-        itemCount: this.cachedArticles.filter(a => a.source.toLowerCase().includes(source.id) || a.sourceType === 'gov').length || 1,
+        itemCount: matchedCount || this.cachedArticles.filter(a => a.source.toLowerCase().includes(source.id) || a.sourceType === 'gov').length || 1,
       });
     }
+
+    // Merge live parsed notices on top of BASE_ARTICLES without duplicates
+    const combinedMap = new Map<string, ScrapedNewsArticle>();
+    for (const a of liveExtracted) combinedMap.set(a.id, a);
+    for (const b of BASE_ARTICLES) combinedMap.set(b.id, b);
+    this.cachedArticles = Array.from(combinedMap.values());
 
     this.lastSyncedAt = now.toISOString();
     this.isSyncing = false;

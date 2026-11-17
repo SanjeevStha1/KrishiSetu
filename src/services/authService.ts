@@ -4,6 +4,14 @@ import { InAppMessageService } from './inAppMessageService';
 const AUTH_STORAGE_KEY = 'krishisetu_auth_user_v30';
 const TOKEN_STORAGE_KEY = 'krishisetu_auth_token_v30';
 const AUTH_IS_LOGGED_IN_KEY = 'krishisetu_is_authenticated_v30';
+const OFFLINE_USERS_STORAGE_KEY = 'krishisetu_offline_users_v2';
+
+// Purge legacy pre-cleanup cached user lists so stale local entries never falsely block registration
+try {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('krishisetu_custom_users_list');
+  }
+} catch {}
 
 export const TEST_USER_ACCOUNTS: {
   id: string;
@@ -22,85 +30,30 @@ export const TEST_USER_ACCOUNTS: {
   primaryCrops: string[];
   roleTag: string;
   badge: string;
-}[] = [
-  {
-    id: 'usr_ram_chitwan_001',
-    name: 'Ram Bahadur Thapa',
-    nepaliName: 'रामबहादुर थापा',
-    phone: '+977 984 501 2345',
-    rawDigits: '9845012345',
-    normalizedPhone: '+9779845012345',
-    district: 'chitwan',
-    municipality: 'Bharatpur-11',
-    ward: '11',
-    locality: 'Bhojad Green Valley',
-    landSize: 4.5,
-    landUnit: 'ropani',
-    farmName: 'Thapa Organic Vegetable Farm',
-    primaryCrops: ['tomato', 'cauliflower', 'potato'],
-    roleTag: 'Commercial Grower (चितवन)',
-    badge: 'Chitwan Vegetable Specialist',
-  },
-  {
-    id: 'usr_sita_dhading_002',
-    name: 'Sita Devi Adhikari',
-    nepaliName: 'सीता देवी अधिकारी',
-    phone: '+977 980 123 4567',
-    rawDigits: '9801234567',
-    normalizedPhone: '+9779801234567',
-    district: 'dhading',
-    municipality: 'Benighat Rorang-03',
-    ward: '3',
-    locality: 'Malekhu Highway Corridor',
-    landSize: 6.0,
-    landUnit: 'ropani',
-    farmName: 'Adhikari Hillside Agro Farm',
-    primaryCrops: ['cabbage', 'ginger', 'tomato'],
-    roleTag: 'Highway Corridor (धादिङ)',
-    badge: 'Dhading Cooperative Lead',
-  },
-  {
-    id: 'usr_bikram_kavre_003',
-    name: 'Bikram Shrestha',
-    nepaliName: 'बिक्रम श्रेष्ठ',
-    phone: '+977 981 234 5678',
-    rawDigits: '9812345678',
-    normalizedPhone: '+9779812345678',
-    district: 'kavre',
-    municipality: 'Panauti-04',
-    ward: '4',
-    locality: 'Subbagaun Valley',
-    landSize: 3.2,
-    landUnit: 'ropani',
-    farmName: 'Panauti Valley Fresh Produce',
-    primaryCrops: ['potato', 'onion', 'capsicum'],
-    roleTag: 'Cold-Storage & Spices (काभ्रे)',
-    badge: 'Kavre Agri Leader',
-  },
-];
+}[] = [];
 
 export const DEMO_GUEST_USER: AuthUser = {
-  id: TEST_USER_ACCOUNTS[0].id,
-  uid: TEST_USER_ACCOUNTS[0].id,
-  name: TEST_USER_ACCOUNTS[0].name,
-  phone: TEST_USER_ACCOUNTS[0].phone,
-  normalizedPhone: TEST_USER_ACCOUNTS[0].normalizedPhone,
-  phoneVerified: true,
+  id: '',
+  uid: '',
+  name: 'Farmer',
+  phone: '',
+  normalizedPhone: '',
+  phoneVerified: false,
   status: 'active',
   preferredLanguage: 'ne',
   province: 'Bagmati',
-  district: TEST_USER_ACCOUNTS[0].district,
-  municipality: TEST_USER_ACCOUNTS[0].municipality,
-  ward: TEST_USER_ACCOUNTS[0].ward,
-  locality: TEST_USER_ACCOUNTS[0].locality,
-  landSize: TEST_USER_ACCOUNTS[0].landSize,
-  landUnit: TEST_USER_ACCOUNTS[0].landUnit,
-  landSizeRopani: TEST_USER_ACCOUNTS[0].landSize,
-  farmName: TEST_USER_ACCOUNTS[0].farmName,
-  primaryCrops: TEST_USER_ACCOUNTS[0].primaryCrops,
-  profileCompletionPct: 100,
-  isGuest: false,
-  createdAt: new Date('2024-10-15T00:00:00.000Z').toISOString(),
+  district: 'chitwan',
+  municipality: '',
+  ward: '1',
+  locality: '',
+  landSize: 2.0,
+  landUnit: 'ropani',
+  landSizeRopani: 2.0,
+  farmName: 'My Agro Farm',
+  primaryCrops: ['tomato', 'potato'],
+  profileCompletionPct: 50,
+  isGuest: true,
+  createdAt: new Date().toISOString(),
 };
 
 export const DEMO_FARMER_USER = DEMO_GUEST_USER;
@@ -300,6 +253,7 @@ export const AuthService = {
     carrier?: string;
     normalizedPhone?: string;
     testCode?: string;
+    simulated?: boolean;
     message: string;
     cooldownSec?: number;
     expiresInSec?: number;
@@ -351,14 +305,22 @@ export const AuthService = {
           success: true,
           carrier: data.carrier || val.carrier,
           normalizedPhone: val.normalized,
-          testCode: '123456',
-          message: `We've sent a 6-digit verification code to ${val.display}`,
+          testCode: data.devOtp || undefined,
+          simulated: Boolean(data.simulated),
+          message: data.message || `We've sent a 6-digit verification code to ${val.display}`,
           cooldownSec: 30,
-          expiresInSec: 900,
+          expiresInSec: 300,
         };
       }
+
+      // Server responded with a non-success response (e.g., 400 invalid phone / carrier error)
+      return {
+        success: false,
+        message: data?.message || data?.error || 'Failed to send verification code.',
+        error: data?.error || data?.message || 'Failed to send verification code.',
+      };
     } catch (e) {
-      // Backend offline or unreachable fallback
+      // Backend offline or network unreachable fallback handled below
     }
 
     // Client-side local check fallback
@@ -394,56 +356,36 @@ export const AuthService = {
   },
 
   /**
-   * Find existing user by phone without side-effects (does NOT create account)
+   * Find existing user in local offline cache by exact 10-digit Nepal mobile number
    */
   findUserByPhone(phone: string): AuthUser | null {
     if (!phone) return null;
     const digits = phone.replace(/\D/g, '');
     const last10 = digits.slice(-10);
+    if (last10.length < 10) return null;
 
-    // 1. Check pre-configured test farmer accounts
-    const matchedTest = TEST_USER_ACCOUNTS.find(acc => 
-      acc.rawDigits === last10 || 
-      acc.phone.replace(/\D/g, '').endsWith(last10) || 
-      (acc.normalizedPhone && acc.normalizedPhone.replace(/\D/g, '').endsWith(last10))
-    );
-
-    if (matchedTest) {
-      return {
-        id: matchedTest.id,
-        uid: matchedTest.id,
-        name: matchedTest.name,
-        phone: matchedTest.phone,
-        normalizedPhone: matchedTest.normalizedPhone,
-        phoneVerified: true,
-        status: 'active',
-        preferredLanguage: 'ne',
-        province: 'Bagmati',
-        district: matchedTest.district,
-        municipality: matchedTest.municipality,
-        ward: matchedTest.ward,
-        locality: matchedTest.locality,
-        landSize: matchedTest.landSize,
-        landUnit: matchedTest.landUnit,
-        landSizeRopani: matchedTest.landSize,
-        farmName: matchedTest.farmName,
-        primaryCrops: matchedTest.primaryCrops,
-        profileCompletionPct: 100,
-        isGuest: false,
-        createdAt: new Date().toISOString(),
-      };
-    }
-
-    // 2. Check persistent custom registered users in localStorage
     try {
       if (typeof window !== 'undefined') {
-        const savedCustomRaw = localStorage.getItem('krishisetu_custom_users_list');
+        const savedCustomRaw = localStorage.getItem(OFFLINE_USERS_STORAGE_KEY);
         if (savedCustomRaw) {
-          const list: AuthUser[] = JSON.parse(savedCustomRaw);
-          const found = list.find(u => {
-            const uDigits = u.phone.replace(/\D/g, '');
+          const rawList: AuthUser[] = JSON.parse(savedCustomRaw);
+          const cleanedList = rawList.filter(
+            (u) =>
+              u.id !== 'usr_guest' &&
+              !u.id?.startsWith('usr_ram_chitwan') &&
+              !u.id?.startsWith('usr_sita_dhading') &&
+              !u.id?.startsWith('usr_bikram_kavre')
+          );
+          if (cleanedList.length !== rawList.length) {
+            localStorage.setItem(OFFLINE_USERS_STORAGE_KEY, JSON.stringify(cleanedList));
+          }
+          const found = cleanedList.find((u) => {
+            const uDigits = (u.phone || '').replace(/\D/g, '');
             const uNormDigits = (u.normalizedPhone || '').replace(/\D/g, '');
-            return uDigits.endsWith(last10) || uNormDigits.endsWith(last10);
+            return (
+              (uDigits.length >= 10 && uDigits.endsWith(last10)) ||
+              (uNormDigits.length >= 10 && uNormDigits.endsWith(last10))
+            );
           });
           if (found) return found;
         }
@@ -454,48 +396,51 @@ export const AuthService = {
   },
 
   /**
-   * Check if a phone number is registered in the database (via backend or local)
+   * Check if a phone number is registered in the database (authoritative backend check first)
    */
   async checkPhoneRegistered(phone: string): Promise<{ exists: boolean; user?: Partial<AuthUser> }> {
-    const local = this.findUserByPhone(phone);
-    if (local) {
-      return { exists: true, user: local };
-    }
-
+    const val = this.validateNepalPhone(phone);
     try {
       const res = await fetch('/api/auth/check-phone', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: val.isValid ? val.normalized : phone }),
       });
       const data = await res.json().catch(() => null);
-      if (data && data.exists) {
-        return { exists: true, user: data.user };
+      if (res.ok && data) {
+        return data.exists ? { exists: true, user: data.user } : { exists: false };
       }
-    } catch (e) {}
+    } catch (e) {
+      // Offline fallback only if backend is unreachable
+      const local = this.findUserByPhone(phone);
+      if (local) {
+        return { exists: true, user: local };
+      }
+    }
 
     return { exists: false };
   },
 
   /**
-   * Save a user into the persistent custom users list in localStorage
+   * Cache an authenticated user into localStorage for offline resilience
    */
   saveCustomUser(user: AuthUser) {
     try {
       if (typeof window !== 'undefined') {
-        const savedCustomRaw = localStorage.getItem('krishisetu_custom_users_list');
+        const savedCustomRaw = localStorage.getItem(OFFLINE_USERS_STORAGE_KEY);
         const list: AuthUser[] = savedCustomRaw ? JSON.parse(savedCustomRaw) : [];
-        const digits = user.phone.replace(/\D/g, '').slice(-10);
-        const index = list.findIndex(u => 
-          u.id === user.id || 
-          u.phone.replace(/\D/g, '').endsWith(digits)
+        const digits = (user.phone || '').replace(/\D/g, '').slice(-10);
+        const index = list.findIndex(
+          (u) =>
+            u.id === user.id ||
+            (digits.length === 10 && (u.phone || '').replace(/\D/g, '').endsWith(digits))
         );
         if (index >= 0) {
           list[index] = { ...list[index], ...user };
         } else {
           list.push(user);
         }
-        localStorage.setItem('krishisetu_custom_users_list', JSON.stringify(list));
+        localStorage.setItem(OFFLINE_USERS_STORAGE_KEY, JSON.stringify(list));
       }
     } catch (e) {}
   },
@@ -524,18 +469,17 @@ export const AuthService = {
     message?: string;
   }> {
     const val = this.validateNepalPhone(data.phone);
-    const existing = this.findUserByPhone(data.phone);
-    if (existing) {
+    if (!val.isValid) {
       return {
         success: false,
-        alreadyExists: true,
-        message: 'यो फोन नम्बर पहिले नै दर्ता भइसकेको छ। कृपया साइन इन गर्नुहोस्।',
-        error: 'This phone number already exists in the database. Please log in.',
+        error: val.error || 'Please enter a valid 10-digit Nepal mobile number.',
+        message: val.error || 'कृपया मान्य १० अंकको नेपाली मोबाइल नम्बर राख्नुहोस्।',
       };
     }
 
     let registeredUser: AuthUser | null = null;
     let token = '';
+    let networkFailed = false;
 
     try {
       const res = await fetch('/api/auth/register', {
@@ -543,7 +487,7 @@ export const AuthService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          phone: val.isValid ? val.normalized : data.phone,
+          phone: val.normalized,
         }),
       });
       const resData = await res.json().catch(() => null);
@@ -557,13 +501,39 @@ export const AuthService = {
         };
       }
 
+      if (!res.ok) {
+        return {
+          success: false,
+          error: resData?.error || 'Registration failed. Please verify your OTP and try again.',
+          message: resData?.message || resData?.error || 'Registration failed.',
+        };
+      }
+
       if (resData && resData.success && resData.user) {
         registeredUser = resData.user;
         token = resData.token;
       }
-    } catch (e) {}
+    } catch (e) {
+      networkFailed = true;
+    }
 
-    if (!registeredUser) {
+    if (!registeredUser && !networkFailed) {
+      return {
+        success: false,
+        error: 'Unable to complete registration.',
+      };
+    }
+
+    if (!registeredUser && networkFailed) {
+      const offlineExisting = this.findUserByPhone(data.phone);
+      if (offlineExisting) {
+        return {
+          success: false,
+          alreadyExists: true,
+          message: 'यो फोन नम्बर पहिले नै दर्ता भइसकेको छ। कृपया साइन इन गर्नुहोस्।',
+          error: 'This phone number already exists in offline cache. Please log in.',
+        };
+      }
       const digits = (data.phone || '').replace(/\D/g, '').slice(-10);
       const display = val.isValid ? val.display : `+977 ${digits.slice(0, 3)} ${digits.slice(3, 6)} ${digits.slice(6)}`;
       const newUserId = `usr_${digits || Date.now()}`;
@@ -655,22 +625,8 @@ export const AuthService = {
     return newUser;
   },
 
-  /**
-   * Direct login helper for one of the 3 test accounts
-   */
-  loginAsTestAccount(indexOrId: number | string): AuthUser {
-    let target = TEST_USER_ACCOUNTS[0];
-    if (typeof indexOrId === 'number' && TEST_USER_ACCOUNTS[indexOrId]) {
-      target = TEST_USER_ACCOUNTS[indexOrId];
-    } else if (typeof indexOrId === 'string') {
-      const found = TEST_USER_ACCOUNTS.find(a => a.id === indexOrId || a.rawDigits === indexOrId || a.name.toLowerCase().includes(indexOrId.toLowerCase()));
-      if (found) target = found;
-    }
-
-    const user = this.resolveFarmerByPhone(target.rawDigits);
-    this.saveCurrentUser(user);
-    this.setToken(`kst_token_${target.id}`);
-    return user;
+  loginAsTestAccount(_indexOrId: number | string): AuthUser | null {
+    return null;
   },
 
   /**
@@ -702,28 +658,17 @@ export const AuthService = {
     const { phoneNumber, code, intent = 'login', registrationData } = params;
     const cleanCode = (code || '').trim();
 
-    // Prototype constraint: OTP must be 123456
-    if (cleanCode !== '123456') {
+    if (!/^\d{6}$/.test(cleanCode)) {
       return {
         success: false,
-        error: 'Invalid verification code. Please try again (Test code: 123456).',
-        message: 'प्रमाणीकरण कोड मिलेन। कृपया पुनः प्रयास गर्नुहोस् (परीक्षण कोड: 123456)।',
+        error: 'Please enter a valid 6-digit verification code.',
+        message: 'कृपया ६ अंकको प्रमाणीकरण कोड राख्नुहोस्।',
       };
     }
 
     const val = this.validateNepalPhone(phoneNumber);
-    const existing = this.findUserByPhone(phoneNumber);
 
     if (intent === 'register') {
-      if (existing) {
-        return {
-          success: false,
-          alreadyExists: true,
-          error: 'This phone number is already registered in the database. Please log in.',
-          message: 'यो फोन नम्बर पहिले नै दर्ता भइसकेको छ। कृपया साइन इन गर्नुहोस्।',
-        };
-      }
-
       const regRes = await this.registerFarmerUser({
         name: registrationData?.name || 'Nepali Farmer',
         phone: phoneNumber,
@@ -743,70 +688,99 @@ export const AuthService = {
     }
 
     if (intent === 'login') {
-      if (!existing) {
-        // Try checking backend verify-otp
-        try {
-          const res = await fetch('/api/auth/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              phone: val.isValid ? val.normalized : phoneNumber,
-              code: cleanCode,
-              intent: 'login',
-            }),
+      // Always verify OTP against backend server first
+      let serverOffline = false;
+      try {
+        const res = await fetch('/api/auth/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: val.isValid ? val.normalized : phoneNumber,
+            code: cleanCode,
+            intent: 'login',
+          }),
+        });
+        const data = await res.json().catch(() => null);
+
+        if (res.status === 404 || (data && data.notRegistered)) {
+          return {
+            success: false,
+            notRegistered: true,
+            error: data?.error || 'This phone number is not registered yet. Please create an account.',
+            message: data?.message || 'यो फोन नम्बर दर्ता भएको छैन। कृपया नयाँ खाता खोल्नुहोस्।',
+          };
+        }
+
+        if (!res.ok) {
+          return {
+            success: false,
+            error: data?.error || 'Invalid or expired verification code.',
+            message: data?.message || 'प्रमाणीकरण कोड मिलेन वा म्याद सकियो।',
+          };
+        }
+
+        if (data && data.success && data.user) {
+          this.saveCustomUser(data.user);
+          this.saveCurrentUser(data.user);
+          this.setToken(data.token || `kst_token_${data.user.id}`);
+
+          InAppMessageService.dispatchMessage({
+            title: `स्वागत छ, ${data.user.name}! (Signed In)`,
+            body: `तपाईँको फोन नम्बर सफलतापूर्वक प्रमाणित भयो। कृषिसेतुमा स्वागत छ (${(data.user.district || 'NEPAL').toUpperCase()})!`,
+            type: 'system_verification',
+            priority: 'high',
+            badge: `${(data.user.district || 'NEPAL').toUpperCase()} Verified Farmer`,
+            actionLabel: 'बजार हेर्नुहोस्',
+            actionTab: 'home',
           });
-          const data = await res.json().catch(() => null);
 
-          if (res.status === 404 || (data && data.notRegistered)) {
-            return {
-              success: false,
-              notRegistered: true,
-              error: 'This phone number is not registered yet. Please create an account.',
-              message: 'यो फोन नम्बर दर्ता भएको छैन। कृपया नयाँ खाता खोल्नुहोस्।',
-            };
-          }
-
-          if (data && data.success && data.user) {
-            this.saveCustomUser(data.user);
-            this.saveCurrentUser(data.user);
-            this.setToken(data.token || `kst_token_${data.user.id}`);
-            return {
-              success: true,
-              user: data.user,
-              token: data.token,
-              message: `Verified successfully. Welcome back, ${data.user.name}!`,
-            };
-          }
-        } catch (e) {}
+          return {
+            success: true,
+            user: data.user,
+            token: data.token,
+            message: `Verified successfully. Welcome back, ${data.user.name}!`,
+          };
+        }
 
         return {
           success: false,
-          notRegistered: true,
-          error: 'This phone number is not registered yet. Please create an account.',
-          message: 'यो फोन नम्बर दर्ता भएको छैन। कृपया नयाँ खाता खोल्नुहोस्।',
+          error: data?.error || 'Unable to verify code.',
+          message: data?.message || 'प्रमाणीकरण असफल भयो।',
+        };
+      } catch (e) {
+        serverOffline = true;
+      }
+
+      // Local offline fallback ONLY when backend server is unreachable
+      const offlineUser = this.findUserByPhone(phoneNumber);
+      if (serverOffline && offlineUser && cleanCode === '123456') {
+        this.saveCurrentUser(offlineUser);
+        const token = `kst_token_${offlineUser.id}`;
+        this.setToken(token);
+
+        InAppMessageService.dispatchMessage({
+          title: `स्वागत छ, ${offlineUser.name}! (Signed In)`,
+          body: `तपाईँको फोन नम्बर सफलतापूर्वक प्रमाणित भयो। कृषिसेतुमा स्वागत छ (${offlineUser.district.toUpperCase()})!`,
+          type: 'system_verification',
+          priority: 'high',
+          badge: `${offlineUser.district.toUpperCase()} Verified Farmer`,
+          actionLabel: 'बजार हेर्नुहोस्',
+          actionTab: 'home',
+        });
+
+        return {
+          success: true,
+          user: offlineUser,
+          token,
+          message: `सफलतापूर्वक लगइन भयो! स्वागत छ, ${offlineUser.name}।`,
         };
       }
 
-      // Existing user found: Log them in and restore full profile
-      this.saveCurrentUser(existing);
-      const token = `kst_token_${existing.id}`;
-      this.setToken(token);
-
-      InAppMessageService.dispatchMessage({
-        title: `स्वागत छ, ${existing.name}! (Signed In)`,
-        body: `तपाईँको फोन नम्बर सफलतापूर्वक प्रमाणित भयो। कृषिसेतुमा स्वागत छ (${existing.district.toUpperCase()})!`,
-        type: 'system_verification',
-        priority: 'high',
-        badge: `${existing.district.toUpperCase()} Verified Farmer`,
-        actionLabel: 'बजार हेर्नुहोस्',
-        actionTab: 'home',
-      });
-
       return {
-        success: true,
-        user: existing,
-        token,
-        message: `सफलतापूर्वक लगइन भयो! स्वागत छ, ${existing.name}।`,
+        success: false,
+        notRegistered: !offlineUser,
+        error: offlineUser ? 'Invalid verification code.' : 'Unable to reach authentication server.',
+        message: offlineUser ? 'प्रमाणीकरण कोड मिलेन।' : 'सर्भरसँग जडान हुन सकेन। कृपया पुनः प्रयास गर्नुहोस्।',
       };
     }
 
@@ -861,27 +835,28 @@ export const AuthService = {
         throw new Error(data.error || 'Failed to complete profile');
       }
 
+      const baseUser = currentUser || ({} as Partial<AuthUser>);
       const updatedUser: AuthUser = {
-        ...currentUser,
+        ...(baseUser as AuthUser),
         id: data.user.id,
         uid: data.user.id,
-        phone: data.user.phone_number,
-        normalizedPhone: data.user.normalized_phone_number,
+        phone: data.user.phone || data.user.phone_number || baseUser.phone || '',
+        normalizedPhone: data.user.normalizedPhone || data.user.normalized_phone_number || baseUser.normalizedPhone || '',
         phoneVerified: true,
         status: 'active',
-        name: data.profile.full_name,
-        preferredLanguage: data.profile.preferred_language,
-        province: data.profile.province,
-        district: data.profile.district,
-        municipality: data.profile.municipality,
-        ward: data.profile.ward,
-        locality: data.profile.locality,
-        landSize: data.farm.land_size,
-        landUnit: data.farm.land_unit,
-        landSizeRopani: data.farm.land_size_ropani_eqv,
-        farmName: data.farm.farm_name,
-        primaryCrops: data.farm.primary_crops,
-        profileCompletionPct: data.profile.profile_completion_pct,
+        name: data.profile?.fullName || data.profile?.full_name || data.user.name || params.fullName,
+        preferredLanguage: data.profile?.preferredLanguage || data.profile?.preferred_language || params.preferredLanguage || 'ne',
+        province: data.profile?.province || params.province || 'Bagmati',
+        district: data.profile?.district || params.district,
+        municipality: data.profile?.municipality || params.municipality || '',
+        ward: data.profile?.ward || params.ward || '1',
+        locality: data.profile?.locality || params.locality || '',
+        landSize: data.farm?.land_size ?? params.landSize ?? 1.0,
+        landUnit: data.farm?.land_unit || params.landUnit || 'ropani',
+        landSizeRopani: data.farm?.land_size_ropani_eqv ?? params.landSize ?? 1.0,
+        farmName: data.farm?.farm_name || params.farmName || `${params.fullName}'s Farm`,
+        primaryCrops: data.farm?.primary_crops || params.primaryCrops || ['tomato'],
+        profileCompletionPct: data.profile?.profileCompletionPct || data.profile?.profile_completion_pct || 100,
         isGuest: false,
       };
 
@@ -943,13 +918,14 @@ export const AuthService = {
         return { success: false, error: data.error || 'Failed to update phone number' };
       }
 
-      const current = this.getCurrentUser();
+      const current = this.getCurrentUser() || ({} as AuthUser);
       const updated: AuthUser = {
         ...current,
-        phone: data.user.phone_number,
-        normalizedPhone: data.user.normalized_phone_number,
+        phone: data.user.phone || data.user.phone_number || current.phone,
+        normalizedPhone: data.user.normalizedPhone || data.user.normalized_phone_number || current.normalizedPhone,
         phoneVerified: true,
       };
+      this.saveCustomUser(updated);
       this.saveCurrentUser(updated);
       return { success: true, user: updated };
     } catch (e: any) {

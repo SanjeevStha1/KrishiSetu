@@ -4,16 +4,35 @@ import { OpenRouterService } from '../services/openRouterService';
 
 export class AiController {
   /**
-   * Main chat endpoint POST /api/chat supporting both Gemini API and OpenRouter API
+   * Main chat endpoint POST /api/chat supporting server-side Gemini API & OpenRouter API
+   * Strictly uses server environment keys (never trusts client-supplied keys).
    */
   public static async handleChat(req: Request, res: Response) {
     try {
-      const { message, language, history, farmerContext } = req.body;
+      const { message, messages, language, history, farmerContext, userContext } = req.body;
 
       // Normalize language: 'en' or 'ne'
-      const normalizedLang: 'en' | 'ne' = language === 'ne' || language === 'np' ? 'ne' : 'en';
+      const rawLang = language || userContext?.language;
+      const normalizedLang: 'en' | 'ne' = rawLang === 'ne' || rawLang === 'np' ? 'ne' : 'en';
 
-      if (!message || typeof message !== 'string' || !message.trim()) {
+      let resolvedMessage = typeof message === 'string' ? message.trim() : '';
+      let resolvedHistory = Array.isArray(history) ? history : [];
+      const resolvedContext = farmerContext || (userContext ? {
+        name: userContext.name || userContext.userName,
+        district: userContext.district,
+        crops: userContext.primaryCrops,
+      } : undefined);
+
+      if (!resolvedMessage && Array.isArray(messages) && messages.length > 0) {
+        const last = messages[messages.length - 1];
+        resolvedMessage = String(last?.text || last?.content || '').trim();
+        resolvedHistory = messages.slice(0, -1).map((m: any) => ({
+          role: m.role === 'assistant' || m.role === 'model' ? 'assistant' : 'user',
+          content: m.text || m.content || '',
+        }));
+      }
+
+      if (!resolvedMessage) {
         const errorMsg = normalizedLang === 'ne'
           ? 'कृपया आफ्नो तरकारी, बजार भाउ वा कृषिसेतु सम्बन्धी प्रश्न सोध्नुहोस्।'
           : 'Please ask a question about your vegetables, market prices, or KrishiSetu features.';
@@ -23,34 +42,54 @@ export class AiController {
         });
       }
 
-      const cleanMessage = message.trim();
+      const cleanMessage = resolvedMessage;
 
-      // Custom API keys optionally passed in headers or body
-      const customGeminiKey =
-        (req.headers['x-api-key'] as string) ||
-        (req.headers['x-gemini-key'] as string) ||
-        req.body?.apiKey ||
-        req.body?.geminiApiKey;
+      const hasGeminiKey = Boolean((process.env.GEMINI_API_KEY || '').trim());
+      const hasOpenRouterKey = Boolean((process.env.OPENROUTER_API_KEY || '').trim());
 
-      const customOpenRouterKey =
-        (req.headers['x-openrouter-key'] as string) ||
-        req.body?.openRouterApiKey;
+      // Strategy 1: Try server-configured Gemini 4 SDK first
+      if (hasGeminiKey) {
+        try {
+          const conversationTurns: Array<{ role: string; content?: string; text?: string }> = [];
+          if (resolvedHistory && Array.isArray(resolvedHistory)) {
+            for (const h of resolvedHistory) {
+              if (h.content || h.text) {
+                conversationTurns.push({
+                  role: h.role === 'assistant' ? 'assistant' : 'user',
+                  text: h.content || h.text,
+                });
+              }
+            }
+          }
+          conversationTurns.push({ role: 'user', text: cleanMessage });
 
-      const hasGeminiKey = Boolean(customGeminiKey || process.env.GEMINI_API_KEY);
-      const hasOpenRouterKey = Boolean(customOpenRouterKey || process.env.OPENROUTER_API_KEY);
+          const geminiReply = await GeminiService.generateKrishiMitraReply(
+            conversationTurns,
+            resolvedContext,
+            normalizedLang
+          );
 
-      // Strategy 1: Try OpenRouter if OpenRouter key is present (user-configured key for Krishi Mitra)
+          if (geminiReply && geminiReply.trim()) {
+            return res.json({
+              reply: geminiReply.trim(),
+              success: true,
+              provider: 'gemini',
+            });
+          }
+        } catch (geminiError: any) {
+          console.warn('[AiController] Gemini generation failed, checking fallback:', geminiError.message || geminiError);
+        }
+      }
+
+      // Strategy 2: Try server-configured OpenRouter fallback if configured
       if (hasOpenRouterKey) {
         try {
-          const openRouterResult = await OpenRouterService.generateChatResponse(
-            {
-              message: cleanMessage,
-              language: normalizedLang,
-              history,
-              farmerContext,
-            },
-            customOpenRouterKey
-          );
+          const openRouterResult = await OpenRouterService.generateChatResponse({
+            message: cleanMessage,
+            language: normalizedLang,
+            history: resolvedHistory,
+            farmerContext: resolvedContext,
+          });
 
           if (openRouterResult.reply && openRouterResult.reply.trim()) {
             return res.json({
@@ -64,45 +103,10 @@ export class AiController {
         }
       }
 
-      // Strategy 2: Try Gemini if Gemini key is present
-      if (hasGeminiKey) {
-        try {
-          const conversationTurns: Array<{ role: string; content?: string; text?: string }> = [];
-          if (history && Array.isArray(history)) {
-            for (const h of history) {
-              if (h.content || h.text) {
-                conversationTurns.push({
-                  role: h.role === 'assistant' ? 'assistant' : 'user',
-                  text: h.content || h.text,
-                });
-              }
-            }
-          }
-          conversationTurns.push({ role: 'user', text: cleanMessage });
-
-          const geminiReply = await GeminiService.generateKrishiMitraReply(
-            conversationTurns,
-            farmerContext,
-            normalizedLang,
-            customGeminiKey
-          );
-
-          if (geminiReply && geminiReply.trim()) {
-            return res.json({
-              reply: geminiReply.trim(),
-              success: true,
-              provider: 'gemini',
-            });
-          }
-        } catch (geminiError: any) {
-          console.warn('[AiController] Gemini generation failed, falling back:', geminiError.message || geminiError);
-        }
-      }
-
       // Strategy 3: Grounded agricultural rule engine fallback
       const groundedFallback = OpenRouterService.generateGroundedFallback(
         cleanMessage,
-        farmerContext,
+        resolvedContext,
         normalizedLang
       );
 
@@ -143,7 +147,6 @@ export class AiController {
         content: m.text || '',
       }));
 
-      // Re-use handleChat logic
       req.body = {
         message: lastUserMsg,
         language: normalizedLang,
@@ -166,4 +169,3 @@ export class AiController {
     }
   }
 }
-

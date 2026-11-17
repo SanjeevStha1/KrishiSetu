@@ -396,19 +396,33 @@ export const ActionableInsights: React.FC<ActionableInsightsProps> = ({
   }, [chartData14Days, cropShelfLifeDays, harvestDaysAgo]);
 
   // -------------------------------------------------------------------------
-  // CARD 3: TRANSPORT POOL STATUS
+  // CARD 3: TRANSPORT POOL STATUS (Distance-scaled nationwide across 28 districts)
   // -------------------------------------------------------------------------
+  const regionalTerminal = useMemo(() => {
+    const prov = currentDistrictObj.province;
+    if (prov === 'Koshi') return { en: 'Birtamod / Biratnagar Mandi', ne: 'बिर्तामोड / विराटनगर मन्डी' };
+    if (prov === 'Madhesh') return { en: 'Birgunj / Lalbandi Mandi', ne: 'वीरगञ्ज / लालबन्दी मन्डी' };
+    if (prov === 'Gandaki') return { en: 'Pokhara Wholesale Hub', ne: 'पोखरा थोक बजार' };
+    if (prov === 'Lumbini') return { en: 'Butwal / Nepalgunj Mandi', ne: 'बुटवल / नेपालगञ्ज मन्डी' };
+    if (prov === 'Karnali') return { en: 'Surkhet / Nepalgunj Hub', ne: 'सुर्खेत / नेपालगञ्ज मन्डी' };
+    if (prov === 'Sudurpashchim') return { en: 'Attariya / Dhangadhi Mandi', ne: 'अत्तरिया / धनगढी मन्डी' };
+    return { en: 'Kalimati Central Mandi', ne: 'कालीमाटी थोक बजार' };
+  }, [currentDistrictObj.province]);
+
   const transportPoolState = useMemo(() => {
+    const distKm = currentDistrictObj.marketDistKm || 0;
     const isValley = ['kathmandu', 'lalitpur', 'bhaktapur'].includes(selectedDistrict.toLowerCase());
-    const soloRate = isValley ? 3.5 : selectedDistrict.toLowerCase() === 'kavre' ? 5.8 : selectedDistrict.toLowerCase() === 'dhading' ? 6.2 : 8.5;
-    const sharedRate = Math.max(1.8, Math.round(soloRate * 0.45 * 10) / 10);
+    const soloRate = isValley
+      ? 3.5
+      : Number(Math.min(14.8, Math.max(4.5, 4.2 + distKm * 0.014)).toFixed(1));
+    const sharedRate = Number(Math.max(1.8, Math.round(soloRate * 0.44 * 10) / 10).toFixed(1));
     const savingsPct = Math.round(((soloRate - sharedRate) / soloRate) * 100);
     const sampleVolumeKg = 350;
     const totalSavingsNpr = Math.round((soloRate - sharedRate) * sampleVolumeKg);
 
     return {
-      hasPool: hasPoolNearby,
-      route: `${currentDistrictObj.name} → ${isNe ? 'कालीमाटी थोक बजार' : 'Kalimati Mandi'}`,
+      hasPool: hasPoolNearby || distKm > 0,
+      route: `${currentDistrictObj.name} → ${isNe ? regionalTerminal.ne : regionalTerminal.en}`,
       departureTime: isNe ? 'आज साँझ ५:०० बजे' : 'Today 5:00 PM',
       capacityBookedKg: 650,
       capacityTotalKg: 1500,
@@ -420,7 +434,7 @@ export const ActionableInsights: React.FC<ActionableInsightsProps> = ({
       savingsPct,
       totalSavingsNpr,
     };
-  }, [selectedDistrict, currentDistrictObj, hasPoolNearby, isNe]);
+  }, [selectedDistrict, currentDistrictObj, hasPoolNearby, isNe, regionalTerminal]);
 
   // -------------------------------------------------------------------------
   // CARD 4: MARKETPLACE & DIRECT BUYER DEMAND LIST
@@ -431,17 +445,18 @@ export const ActionableInsights: React.FC<ActionableInsightsProps> = ({
   const localBuyersList = useMemo(() => {
     const currentPrice = chartData14Days.currentPrice;
     const mandiNetPayout = Math.round(currentPrice - (transportPoolState.sharedRate + currentPrice * 0.015));
+    const shortDistrict = currentDistrictObj.name.split('(')[0].trim();
 
     return [
       {
         id: 'buyer-1',
-        nameEn: 'Kathmandu Fresh Mart',
-        nameNe: 'काठमाडौँ ताजा मार्ट',
+        nameEn: `${shortDistrict} Fresh Agro Mart`,
+        nameNe: `${shortDistrict} ताजा कृषि मार्ट`,
         volumeKg: 250,
         rate: Math.round(currentPrice * 1.08),
         distanceKm: 4.2,
-        locationEn: 'Bharatpur-10',
-        locationNe: 'भरतपुर-१०',
+        locationEn: `${shortDistrict} Bazar`,
+        locationNe: `${shortDistrict} बजार`,
         diffVsMandi: Math.round(currentPrice * 1.08) - mandiNetPayout,
         typeEn: 'Supermarket',
         typeNe: 'सुपरमार्केट',
@@ -449,13 +464,13 @@ export const ActionableInsights: React.FC<ActionableInsightsProps> = ({
       },
       {
         id: 'buyer-2',
-        nameEn: 'Himalayan Kitchens',
-        nameNe: 'हिमालयन किचेन',
+        nameEn: 'Himalayan Fresh Kitchens',
+        nameNe: 'हिमालयन ताजा किचेन',
         volumeKg: 150,
         rate: Math.round(currentPrice * 1.10),
         distanceKm: 6.8,
-        locationEn: 'Sauraha Road',
-        locationNe: 'सौराह रोड',
+        locationEn: `${currentDistrictObj.province} Corridor`,
+        locationNe: `${currentDistrictObj.province} कोरिडोर`,
         diffVsMandi: Math.round(currentPrice * 1.10) - mandiNetPayout,
         typeEn: 'Restaurant Network',
         typeNe: 'रेस्टुरेन्ट सञ्जाल',
@@ -463,20 +478,20 @@ export const ActionableInsights: React.FC<ActionableInsightsProps> = ({
       },
       {
         id: 'buyer-3',
-        nameEn: 'Narayangarh Agro-Hub',
-        nameNe: 'नारायणगढ एग्रो-हब',
+        nameEn: regionalTerminal.en,
+        nameNe: regionalTerminal.ne,
         volumeKg: 500,
         rate: Math.round(currentPrice * 1.05),
         distanceKm: 2.5,
-        locationEn: 'Narayangarh Mandi',
-        locationNe: 'नारायणगढ मन्डी',
+        locationEn: `${shortDistrict} Hub`,
+        locationNe: `${shortDistrict} केन्द्र`,
         diffVsMandi: Math.round(currentPrice * 1.05) - mandiNetPayout,
         typeEn: 'Wholesaler',
         typeNe: 'थोक बिक्रेता',
         phone: '+977 9855034567',
       },
     ];
-  }, [chartData14Days.currentPrice, transportPoolState.sharedRate]);
+  }, [chartData14Days.currentPrice, transportPoolState.sharedRate, currentDistrictObj.name, currentDistrictObj.province, regionalTerminal]);
 
   // -------------------------------------------------------------------------
   // PRICE PROJECTION TABLE FOR KRISHI RECOMMENDATIONS (Today, Tomorrow, Day After Tomorrow)

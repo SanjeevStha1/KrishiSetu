@@ -49,17 +49,90 @@ export const COMMODITY_SEEDS = [
 ] as const;
 
 export const DISTRICT_LIST = [
-  { id: 'chitwan', name: 'Chitwan', zone: 'Subtropical', elevation: '300m', roadAccess: 'Excellent', marketDistKm: 160, lat: 27.6833, lon: 84.4333 },
-  { id: 'kathmandu', name: 'Kathmandu', zone: 'Temperate', elevation: '1400m', roadAccess: 'Terminal Hub', marketDistKm: 0, lat: 27.7172, lon: 85.3240 },
-  { id: 'pokhara', name: 'Pokhara / Kaski', zone: 'Subtropical', elevation: '900m', roadAccess: 'Excellent', marketDistKm: 200, lat: 28.2096, lon: 83.9856 },
-  { id: 'kavre', name: 'Kavrepalanchok', zone: 'Temperate', elevation: '1600m', roadAccess: 'Good', marketDistKm: 35, lat: 27.6221, lon: 85.5564 },
-  { id: 'dhading', name: 'Dhading', zone: 'Subtropical', elevation: '800m', roadAccess: 'Fair (Highway)', marketDistKm: 55, lat: 27.8667, lon: 84.9000 },
-  { id: 'makwanpur', name: 'Makwanpur (Hetauda)', zone: 'Subtropical', elevation: '400m', roadAccess: 'Good', marketDistKm: 80, lat: 27.4287, lon: 85.0328 },
-  { id: 'nuwakot', name: 'Nuwakot', zone: 'Temperate', elevation: '1200m', roadAccess: 'Fair', marketDistKm: 70, lat: 27.9167, lon: 85.1667 },
-  { id: 'rupandehi', name: 'Rupandehi (Bhairahawa)', zone: 'Subtropical', elevation: '100m', roadAccess: 'Excellent', marketDistKm: 280, lat: 27.5000, lon: 83.4500 },
-  { id: 'palpa', name: 'Palpa (Tansen)', zone: 'Temperate', elevation: '1300m', roadAccess: 'Good', marketDistKm: 120, lat: 27.8667, lon: 83.5500 },
-  { id: 'tanahun', name: 'Tanahun', zone: 'Subtropical', elevation: '700m', roadAccess: 'Good', marketDistKm: 40, lat: 27.9667, lon: 84.2833 },
-  { id: 'jumla', name: 'Jumla', zone: 'Alpine', elevation: '2500m', roadAccess: 'Poor / Mountain', marketDistKm: 350, lat: 29.2747, lon: 82.1838 },
+  // Koshi Province (14 Districts)
+  { id: 'jhapa', name: 'Jhapa (Birtamod)', province: 'Koshi', zone: 'Subtropical', elevation: '120m', roadAccess: 'Excellent', marketDistKm: 495, lat: 26.6333, lon: 87.9833 },
+  { id: 'morang', name: 'Morang (Biratnagar)', province: 'Koshi', zone: 'Subtropical', elevation: '80m', roadAccess: 'Excellent', marketDistKm: 395, lat: 26.4525, lon: 87.2718 },
+  { id: 'sunsari', name: 'Sunsari (Dharan)', province: 'Koshi', zone: 'Subtropical', elevation: '340m', roadAccess: 'Excellent', marketDistKm: 375, lat: 26.8147, lon: 87.2797 },
+  { id: 'ilam', name: 'Ilam', province: 'Koshi', zone: 'Temperate', elevation: '1650m', roadAccess: 'Good', marketDistKm: 560, lat: 26.9094, lon: 87.9282 },
+  { id: 'taplejung', name: 'Taplejung', province: 'Koshi', zone: 'Alpine', elevation: '1800m', roadAccess: 'Mechi Hwy Extension', marketDistKm: 720, lat: 27.3545, lon: 87.6694 },
+  { id: 'panchthar', name: 'Panchthar (Phidim)', province: 'Koshi', zone: 'Temperate', elevation: '1250m', roadAccess: 'Good', marketDistKm: 635, lat: 27.1436, lon: 87.7656 },
+  { id: 'dhankuta', name: 'Dhankuta (Hile)', province: 'Koshi', zone: 'Temperate', elevation: '1550m', roadAccess: 'Excellent', marketDistKm: 425, lat: 26.9833, lon: 87.3464 },
+  { id: 'terhathum', name: 'Terhathum (Myanglung)', province: 'Koshi', zone: 'Temperate', elevation: '1600m', roadAccess: 'Good', marketDistKm: 480, lat: 27.1292, lon: 87.5372 },
+  { id: 'sankhuwasabha', name: 'Sankhuwasabha (Khandbari)', province: 'Koshi', zone: 'Temperate', elevation: '1100m', roadAccess: 'Fair', marketDistKm: 520, lat: 27.3756, lon: 87.2094 },
+  { id: 'bhojpur', name: 'Bhojpur', province: 'Koshi', zone: 'Temperate', elevation: '1500m', roadAccess: 'Fair', marketDistKm: 510, lat: 27.1714, lon: 87.0467 },
+  { id: 'solukhumbu', name: 'Solukhumbu (Salleri)', province: 'Koshi', zone: 'Alpine', elevation: '2350m', roadAccess: 'Mountain Road', marketDistKm: 280, lat: 27.5067, lon: 86.5867 },
+  { id: 'okhaldhunga', name: 'Okhaldhunga', province: 'Koshi', zone: 'Temperate', elevation: '1750m', roadAccess: 'Good', marketDistKm: 225, lat: 27.3144, lon: 86.5025 },
+  { id: 'khotang', name: 'Khotang (Diktel)', province: 'Koshi', zone: 'Temperate', elevation: '1600m', roadAccess: 'Fair', marketDistKm: 275, lat: 27.2119, lon: 86.7917 },
+  { id: 'udayapur', name: 'Udayapur (Gaighat)', province: 'Koshi', zone: 'Subtropical', elevation: '220m', roadAccess: 'Good', marketDistKm: 245, lat: 26.7919, lon: 86.6997 },
+  // Madhesh Province (8 Districts)
+  { id: 'sarlahi', name: 'Sarlahi (Lalbandi)', province: 'Madhesh', zone: 'Subtropical', elevation: '110m', roadAccess: 'Excellent', marketDistKm: 235, lat: 27.0544, lon: 85.6295 },
+  { id: 'dhanusha', name: 'Dhanusha (Janakpur)', province: 'Madhesh', zone: 'Subtropical', elevation: '74m', roadAccess: 'Excellent', marketDistKm: 225, lat: 26.7271, lon: 85.9407 },
+  { id: 'parsa', name: 'Parsa (Birgunj)', province: 'Madhesh', zone: 'Subtropical', elevation: '80m', roadAccess: 'Excellent', marketDistKm: 135, lat: 27.0104, lon: 84.8777 },
+  { id: 'saptari', name: 'Saptari (Rajbiraj)', province: 'Madhesh', zone: 'Subtropical', elevation: '80m', roadAccess: 'Excellent', marketDistKm: 335, lat: 26.5403, lon: 86.7483 },
+  { id: 'siraha', name: 'Siraha (Lahan)', province: 'Madhesh', zone: 'Subtropical', elevation: '90m', roadAccess: 'Excellent', marketDistKm: 285, lat: 26.7172, lon: 86.4833 },
+  { id: 'mahottari', name: 'Mahottari (Bardibas)', province: 'Madhesh', zone: 'Subtropical', elevation: '95m', roadAccess: 'Excellent', marketDistKm: 215, lat: 26.9000, lon: 85.8942 },
+  { id: 'rautahat', name: 'Rautahat (Chandrapur)', province: 'Madhesh', zone: 'Subtropical', elevation: '90m', roadAccess: 'Excellent', marketDistKm: 185, lat: 27.1275, lon: 85.3589 },
+  { id: 'bara', name: 'Bara (Kalaiya / Nijgadh)', province: 'Madhesh', zone: 'Subtropical', elevation: '95m', roadAccess: 'Excellent', marketDistKm: 145, lat: 27.0333, lon: 85.0000 },
+  // Bagmati Province (13 Districts)
+  { id: 'chitwan', name: 'Chitwan (Narayangarh)', province: 'Bagmati', zone: 'Subtropical', elevation: '300m', roadAccess: 'Excellent', marketDistKm: 160, lat: 27.6833, lon: 84.4333 },
+  { id: 'kathmandu', name: 'Kathmandu (Kalimati)', province: 'Bagmati', zone: 'Temperate', elevation: '1400m', roadAccess: 'Terminal Hub', marketDistKm: 0, lat: 27.7172, lon: 85.3240 },
+  { id: 'lalitpur', name: 'Lalitpur', province: 'Bagmati', zone: 'Temperate', elevation: '1350m', roadAccess: 'Terminal Hub', marketDistKm: 12, lat: 27.6667, lon: 85.3167 },
+  { id: 'bhaktapur', name: 'Bhaktapur', province: 'Bagmati', zone: 'Temperate', elevation: '1400m', roadAccess: 'Terminal Hub', marketDistKm: 15, lat: 27.6710, lon: 85.4298 },
+  { id: 'kavre', name: 'Kavrepalanchok (Panchkhal)', province: 'Bagmati', zone: 'Temperate', elevation: '1600m', roadAccess: 'Good', marketDistKm: 42, lat: 27.6221, lon: 85.5564 },
+  { id: 'dhading', name: 'Dhading (Malekhu)', province: 'Bagmati', zone: 'Subtropical', elevation: '800m', roadAccess: 'Fair (Highway)', marketDistKm: 65, lat: 27.8667, lon: 84.9000 },
+  { id: 'makwanpur', name: 'Makwanpur (Hetauda)', province: 'Bagmati', zone: 'Subtropical', elevation: '460m', roadAccess: 'Good', marketDistKm: 82, lat: 27.4287, lon: 85.0328 },
+  { id: 'nuwakot', name: 'Nuwakot (Trishuli)', province: 'Bagmati', zone: 'Temperate', elevation: '1200m', roadAccess: 'Fair', marketDistKm: 68, lat: 27.9167, lon: 85.1667 },
+  { id: 'sindhupalchok', name: 'Sindhupalchok (Mude)', province: 'Bagmati', zone: 'Temperate', elevation: '1850m', roadAccess: 'Fair', marketDistKm: 88, lat: 27.8333, lon: 85.5667 },
+  { id: 'dolakha', name: 'Dolakha (Charikot)', province: 'Bagmati', zone: 'Temperate', elevation: '1980m', roadAccess: 'Good', marketDistKm: 133, lat: 27.6675, lon: 86.0469 },
+  { id: 'rasuwa', name: 'Rasuwa (Dhunche)', province: 'Bagmati', zone: 'Alpine', elevation: '2050m', roadAccess: 'Mountain Hwy', marketDistKm: 118, lat: 28.1136, lon: 85.2914 },
+  { id: 'ramechhap', name: 'Ramechhap (Manthali)', province: 'Bagmati', zone: 'Temperate', elevation: '650m', roadAccess: 'Good', marketDistKm: 138, lat: 27.3922, lon: 86.0608 },
+  { id: 'sindhuli', name: 'Sindhuli (Kamalamai)', province: 'Bagmati', zone: 'Subtropical', elevation: '580m', roadAccess: 'Excellent', marketDistKm: 152, lat: 27.2167, lon: 85.9167 },
+  // Gandaki Province (11 Districts)
+  { id: 'pokhara', name: 'Kaski (Pokhara)', province: 'Gandaki', zone: 'Subtropical', elevation: '900m', roadAccess: 'Excellent', marketDistKm: 202, lat: 28.2096, lon: 83.9856 },
+  { id: 'tanahun', name: 'Tanahun (Damauli)', province: 'Gandaki', zone: 'Subtropical', elevation: '700m', roadAccess: 'Good', marketDistKm: 152, lat: 27.9667, lon: 84.2833 },
+  { id: 'gorkha', name: 'Gorkha', province: 'Gandaki', zone: 'Temperate', elevation: '1150m', roadAccess: 'Good', marketDistKm: 140, lat: 28.0000, lon: 84.6333 },
+  { id: 'mustang', name: 'Mustang (Jomsom)', province: 'Gandaki', zone: 'Alpine', elevation: '2750m', roadAccess: 'Mountain Corridor', marketDistKm: 365, lat: 28.7806, lon: 83.7231 },
+  { id: 'manang', name: 'Manang (Chame)', province: 'Gandaki', zone: 'Alpine', elevation: '2680m', roadAccess: 'Mountain Corridor', marketDistKm: 275, lat: 28.5542, lon: 84.2367 },
+  { id: 'myagdi', name: 'Myagdi (Beni)', province: 'Gandaki', zone: 'Temperate', elevation: '1150m', roadAccess: 'Good', marketDistKm: 285, lat: 28.3436, lon: 83.5625 },
+  { id: 'lamjung', name: 'Lamjung (Besisahar)', province: 'Gandaki', zone: 'Temperate', elevation: '820m', roadAccess: 'Good', marketDistKm: 176, lat: 28.2333, lon: 84.3833 },
+  { id: 'nawalpur', name: 'Nawalpur (Kawasoti)', province: 'Gandaki', zone: 'Subtropical', elevation: '185m', roadAccess: 'Excellent', marketDistKm: 192, lat: 27.6431, lon: 84.1286 },
+  { id: 'syangja', name: 'Syangja (Waling)', province: 'Gandaki', zone: 'Temperate', elevation: '920m', roadAccess: 'Good', marketDistKm: 238, lat: 28.0972, lon: 83.8714 },
+  { id: 'parbat', name: 'Parbat (Kusma)', province: 'Gandaki', zone: 'Temperate', elevation: '950m', roadAccess: 'Good', marketDistKm: 256, lat: 28.2219, lon: 83.6789 },
+  { id: 'baglung', name: 'Baglung', province: 'Gandaki', zone: 'Temperate', elevation: '1120m', roadAccess: 'Good', marketDistKm: 272, lat: 28.2719, lon: 83.5897 },
+  // Lumbini Province (12 Districts)
+  { id: 'rupandehi', name: 'Rupandehi (Butwal / Bhairahawa)', province: 'Lumbini', zone: 'Subtropical', elevation: '100m', roadAccess: 'Excellent', marketDistKm: 265, lat: 27.6866, lon: 83.4323 },
+  { id: 'palpa', name: 'Palpa (Tansen)', province: 'Lumbini', zone: 'Temperate', elevation: '1300m', roadAccess: 'Good', marketDistKm: 305, lat: 27.8667, lon: 83.5500 },
+  { id: 'dang', name: 'Dang (Ghorahi)', province: 'Lumbini', zone: 'Subtropical', elevation: '650m', roadAccess: 'Good', marketDistKm: 415, lat: 28.0500, lon: 82.4833 },
+  { id: 'banke', name: 'Banke (Nepalgunj)', province: 'Lumbini', zone: 'Subtropical', elevation: '150m', roadAccess: 'Excellent', marketDistKm: 515, lat: 28.0500, lon: 81.6167 },
+  { id: 'rukum_east', name: 'Rukum East (Rukumkot)', province: 'Lumbini', zone: 'Alpine', elevation: '1950m', roadAccess: 'Mid-Hill Hwy', marketDistKm: 485, lat: 28.6100, lon: 82.6150 },
+  { id: 'rolpa', name: 'Rolpa (Liwang)', province: 'Lumbini', zone: 'Temperate', elevation: '1380m', roadAccess: 'Fair', marketDistKm: 430, lat: 28.3036, lon: 82.6331 },
+  { id: 'pyuthan', name: 'Pyuthan (Bijuwar)', province: 'Lumbini', zone: 'Temperate', elevation: '1050m', roadAccess: 'Good', marketDistKm: 375, lat: 28.0958, lon: 82.8528 },
+  { id: 'gulmi', name: 'Gulmi (Tamghas)', province: 'Lumbini', zone: 'Temperate', elevation: '1480m', roadAccess: 'Good', marketDistKm: 355, lat: 28.0711, lon: 83.2492 },
+  { id: 'arghakhanchi', name: 'Arghakhanchi (Sandhikharka)', province: 'Lumbini', zone: 'Temperate', elevation: '1320m', roadAccess: 'Good', marketDistKm: 345, lat: 27.9711, lon: 83.1336 },
+  { id: 'parasi', name: 'Nawalparasi West (Parasi)', province: 'Lumbini', zone: 'Subtropical', elevation: '115m', roadAccess: 'Excellent', marketDistKm: 245, lat: 27.5300, lon: 83.6683 },
+  { id: 'kapilvastu', name: 'Kapilvastu (Taulihawa)', province: 'Lumbini', zone: 'Subtropical', elevation: '105m', roadAccess: 'Excellent', marketDistKm: 315, lat: 27.5389, lon: 83.0500 },
+  { id: 'bardiya', name: 'Bardiya (Gulariya)', province: 'Lumbini', zone: 'Subtropical', elevation: '135m', roadAccess: 'Excellent', marketDistKm: 545, lat: 28.2067, lon: 81.3453 },
+  // Karnali Province (10 Districts)
+  { id: 'surkhet', name: 'Surkhet (Birendranagar)', province: 'Karnali', zone: 'Subtropical', elevation: '720m', roadAccess: 'Good', marketDistKm: 585, lat: 28.6000, lon: 81.6333 },
+  { id: 'jumla', name: 'Jumla', province: 'Karnali', zone: 'Alpine', elevation: '2500m', roadAccess: 'Mountain Hwy', marketDistKm: 790, lat: 29.2747, lon: 82.1838 },
+  { id: 'dolpa', name: 'Dolpa (Dunai)', province: 'Karnali', zone: 'Alpine', elevation: '2150m', roadAccess: 'Mountain Corridor', marketDistKm: 840, lat: 28.9478, lon: 82.8994 },
+  { id: 'mugu', name: 'Mugu (Gamgadhi)', province: 'Karnali', zone: 'Alpine', elevation: '2100m', roadAccess: 'Karnali Branch Hwy', marketDistKm: 865, lat: 29.5469, lon: 82.1489 },
+  { id: 'humla', name: 'Humla (Simikot)', province: 'Karnali', zone: 'Alpine', elevation: '2910m', roadAccess: 'Mountain Corridor', marketDistKm: 910, lat: 29.9697, lon: 81.8194 },
+  { id: 'kalikot', name: 'Kalikot (Manma)', province: 'Karnali', zone: 'Temperate', elevation: '1650m', roadAccess: 'Karnali Highway', marketDistKm: 725, lat: 29.1525, lon: 81.6161 },
+  { id: 'dailekh', name: 'Dailekh', province: 'Karnali', zone: 'Temperate', elevation: '1420m', roadAccess: 'Good', marketDistKm: 645, lat: 28.8428, lon: 81.7189 },
+  { id: 'jajarkot', name: 'Jajarkot (Khalanga)', province: 'Karnali', zone: 'Temperate', elevation: '1280m', roadAccess: 'Fair', marketDistKm: 635, lat: 28.7039, lon: 82.1981 },
+  { id: 'rukum_west', name: 'Rukum West (Musikot)', province: 'Karnali', zone: 'Temperate', elevation: '1450m', roadAccess: 'Good', marketDistKm: 525, lat: 28.6331, lon: 82.4631 },
+  { id: 'salyan', name: 'Salyan (Kapurkot)', province: 'Karnali', zone: 'Temperate', elevation: '1500m', roadAccess: 'Good', marketDistKm: 475, lat: 28.3742, lon: 82.1636 },
+  // Sudurpashchim Province (9 Districts)
+  { id: 'kailali', name: 'Kailali (Dhangadhi / Attariya)', province: 'Sudurpashchim', zone: 'Subtropical', elevation: '110m', roadAccess: 'Excellent', marketDistKm: 660, lat: 28.7014, lon: 80.5897 },
+  { id: 'dadeldhura', name: 'Dadeldhura', province: 'Sudurpashchim', zone: 'Temperate', elevation: '1750m', roadAccess: 'Good', marketDistKm: 755, lat: 29.2986, lon: 80.5806 },
+  { id: 'bajura', name: 'Bajura (Martadi)', province: 'Sudurpashchim', zone: 'Alpine', elevation: '1650m', roadAccess: 'Fair', marketDistKm: 885, lat: 29.4550, lon: 81.4733 },
+  { id: 'bajhang', name: 'Bajhang (Chainpur)', province: 'Sudurpashchim', zone: 'Alpine', elevation: '1420m', roadAccess: 'Fair', marketDistKm: 855, lat: 29.5536, lon: 81.1967 },
+  { id: 'darchula', name: 'Darchula (Khalanga)', province: 'Sudurpashchim', zone: 'Alpine', elevation: '1350m', roadAccess: 'Good', marketDistKm: 925, lat: 29.8458, lon: 80.5467 },
+  { id: 'baitadi', name: 'Baitadi (Gothalapani)', province: 'Sudurpashchim', zone: 'Temperate', elevation: '1520m', roadAccess: 'Good', marketDistKm: 825, lat: 29.5464, lon: 80.4150 },
+  { id: 'doti', name: 'Doti (Dipayal)', province: 'Sudurpashchim', zone: 'Temperate', elevation: '850m', roadAccess: 'Good', marketDistKm: 785, lat: 29.2614, lon: 80.9353 },
+  { id: 'achham', name: 'Achham (Mangalsen)', province: 'Sudurpashchim', zone: 'Temperate', elevation: '1360m', roadAccess: 'Fair', marketDistKm: 845, lat: 29.1394, lon: 81.2519 },
+  { id: 'kanchanpur', name: 'Kanchanpur (Mahendranagar)', province: 'Sudurpashchim', zone: 'Subtropical', elevation: '185m', roadAccess: 'Excellent', marketDistKm: 705, lat: 28.9631, lon: 80.1772 },
 ];
 
 export interface LiveRateOverride {
@@ -336,38 +409,42 @@ export function generateForecastData(
   const points: ForecastPoint[] = [];
   const now = startDate;
   const cropSummary = commodityId ? getKalimatiCrop(commodityId) : null;
-  const liveRate = commodityId ? DEFAULT_LIVE_OVERRIDES[commodityId] : null;
+  const liveRate = commodityId ? getLiveRateOverride(commodityId) : null;
 
-  // Short-term velocity estimate based on current price momentum
-  const dailyVelocity = liveRate ? (liveRate.currentPrice - liveRate.yesterdayPrice) : 0;
+  // Apply live short-term price velocity only when projecting from today (not during historical backtests)
+  const isNearToday = Math.abs(Date.now() - startDate.getTime()) < 36 * 60 * 60 * 1000;
+  const dailyVelocity = isNearToday && liveRate ? (liveRate.currentPrice - liveRate.yesterdayPrice) : 0;
 
   for (let i = 1; i <= days; i++) {
     const d = new Date(now.getTime() + i * 24 * 60 * 60 * 1000);
     const dayOfWeek = d.getDay();
-    const weekendDip = (dayOfWeek === 0 || dayOfWeek === 6) ? -0.4 : 0.2;
+    const weekendDip = (dayOfWeek === 0 || dayOfWeek === 6) ? -0.25 : 0.1;
     const mIdx = d.getMonth();
+    const nextMIdx = (mIdx + 1) % 12;
+    const monthProgress = (d.getDate() - 1) / 30;
 
-    // 1. Empirical Seasonal Reversion Component: Pulls towards 6-year Kalimati monthly median
+    // 1. Empirical Seasonal Reversion Component: Smooth intra-month interpolation across 6-year Kalimati monthly means
     let seasonalTarget = currentPrice;
     if (cropSummary && cropSummary.monthlySeasonality[mIdx]) {
-      seasonalTarget = cropSummary.monthlySeasonality[mIdx].avgPriceNPR;
+      const currMonthAvg = cropSummary.monthlySeasonality[mIdx].avgPriceNPR;
+      const nextMonthAvg = cropSummary.monthlySeasonality[nextMIdx]?.avgPriceNPR ?? currMonthAvg;
+      seasonalTarget = currMonthAvg + (nextMonthAvg - currMonthAvg) * monthProgress;
     }
-    // Mean reversion velocity (1 - exp(-0.08 * t))
-    const seasonalDrift = (seasonalTarget - currentPrice) * (1 - Math.exp(-0.08 * i));
+    const seasonalDrift = (seasonalTarget - currentPrice) * (1 - Math.exp(-0.22 * i));
     const seasonalPrice = Number((currentPrice + seasonalDrift).toFixed(2));
 
-    // 2. Autoregressive Momentum Component: Decays daily (velocity * 0.75^i)
-    const momentumDecay = dailyVelocity * Math.pow(0.75, i) + weekendDip;
+    // 2. Autoregressive Momentum Component: Decays daily (velocity * 0.72^i)
+    const momentumDecay = dailyVelocity * Math.pow(0.72, i) + weekendDip;
     const momentumPrice = Number((currentPrice + momentumDecay).toFixed(2));
 
-    // 3. Supply Inflow Elasticity Component: Slight sinusoidal volume shock simulation
-    const supplyShock = Math.sin(i * 0.2) * (currentPrice * 0.035);
-    const supplyPrice = Number((currentPrice + supplyShock).toFixed(2));
+    // 3. Supply Inflow Elasticity Component: Mild cyclical volume oscillation
+    const supplyShock = Math.sin(i * 0.25) * (currentPrice * 0.012);
+    const supplyPrice = Number((seasonalPrice + supplyShock).toFixed(2));
 
-    // Master Ensemble Projection: Balanced combination
+    // Master Ensemble Projection: Balanced econometric combination
     const ensemblePred = Math.max(5, Number((
-      0.45 * seasonalPrice +
-      0.35 * momentumPrice +
+      0.60 * seasonalPrice +
+      0.20 * momentumPrice +
       0.20 * supplyPrice
     ).toFixed(2)));
 
@@ -779,6 +856,125 @@ export function getRecommendationsForDistrict(districtId: string, landSizeRopani
       },
     ],
   };
+
+  const distMeta = DISTRICT_LIST.find((d) => d.id.toLowerCase() === districtId.toLowerCase());
+  const isAlpine = distMeta?.zone === 'Alpine';
+  const isTemperate = distMeta?.zone === 'Temperate';
+
+  if (isAlpine) {
+    const alpineList: FarmerRecommendation[] = [
+      {
+        rank: 1,
+        crop: 'potato',
+        cropDisplayName: 'Highland Red Potato',
+        nepaliName: 'हिमाली रातो आलु',
+        plantingWeek: 10,
+        expectedHarvestWeek: 24,
+        daysToHarvest: 95,
+        expectedPricePerKg: 54.0,
+        expectedYieldKg: Math.round(280 * landSizeRopani),
+        expectedRevenue: Math.round(54.0 * 280 * landSizeRopani),
+        expectedProfit: Math.round((54.0 * 280 - 6500) * landSizeRopani),
+        inputCost: Math.round(6500 * landSizeRopani),
+        riskScore: 2.7,
+        riskLevel: 'low',
+        confidencePct: 92.0,
+        compositeScore: 9.05,
+        sharpeRatio: 2.02,
+        marketOutlook: 'Organic highland tubers earn 20%+ premium in Pokhara, Surkhet & Nepalgunj wholesale hubs.',
+        keyRisks: 'Late frost, mountain pass transit delays',
+        mitigation: 'Cure potatoes 7 days post-harvest and pool Karnali/Kaligandaki cargo vans.',
+      },
+      {
+        rank: 2,
+        crop: 'beans',
+        cropDisplayName: 'Jumla Organic Beans (Simi)',
+        nepaliName: 'जुम्ली अर्गानिक सिमी',
+        plantingWeek: 14,
+        expectedHarvestWeek: 25,
+        daysToHarvest: 80,
+        expectedPricePerKg: 95.0,
+        expectedYieldKg: Math.round(160 * landSizeRopani),
+        expectedRevenue: Math.round(95.0 * 160 * landSizeRopani),
+        expectedProfit: Math.round((95.0 * 160 - 5200) * landSizeRopani),
+        inputCost: Math.round(5200 * landSizeRopani),
+        riskScore: 2.4,
+        riskLevel: 'low',
+        confidencePct: 90.0,
+        compositeScore: 8.85,
+        sharpeRatio: 2.15,
+        marketOutlook: 'High shelf-life dried/fresh pulse with strong nationwide specialty buyer demand.',
+        keyRisks: 'Moisture damage during monsoon storage',
+        mitigation: 'Sun-dry to 12% moisture and pack in moisture-barrier sacks.',
+      },
+      ...recommendations.chitwan.slice(2, 4).map((item, idx) => ({
+        ...item,
+        rank: idx + 3,
+        expectedYieldKg: Math.round(item.expectedYieldKg * (landSizeRopani / 5.0)),
+        expectedRevenue: Math.round(item.expectedRevenue * (landSizeRopani / 5.0)),
+        expectedProfit: Math.round(item.expectedProfit * (landSizeRopani / 5.0)),
+        inputCost: Math.round(item.inputCost * (landSizeRopani / 5.0)),
+      })),
+    ];
+    return alpineList;
+  }
+
+  if (isTemperate) {
+    const hillList: FarmerRecommendation[] = [
+      {
+        ...recommendations.chitwan[0],
+        rank: 1,
+        crop: 'tomato',
+        cropDisplayName: 'Mid-Hill Tunnel Tomato',
+        nepaliName: 'टनेल गोलभेडा',
+        expectedPricePerKg: 52.0,
+        expectedYieldKg: Math.round(270 * landSizeRopani),
+        expectedRevenue: Math.round(52.0 * 270 * landSizeRopani),
+        expectedProfit: Math.round((52.0 * 270 - 8200) * landSizeRopani),
+        inputCost: Math.round(8200 * landSizeRopani),
+        marketOutlook: 'Off-season mid-hill polyhouse harvest captures peak Kalimati & regional mandi premiums.',
+      },
+      {
+        ...recommendations.chitwan[2],
+        rank: 2,
+        expectedYieldKg: Math.round(310 * (landSizeRopani / 5.0)),
+        expectedRevenue: Math.round(28.0 * 310 * (landSizeRopani / 5.0)),
+        expectedProfit: Math.round((28.0 * 310 - 5400) * (landSizeRopani / 5.0)),
+        inputCost: Math.round(5400 * (landSizeRopani / 5.0)),
+      },
+      {
+        rank: 3,
+        crop: 'ginger',
+        cropDisplayName: 'Washed Hill Ginger',
+        nepaliName: 'पहाडी अदुवा',
+        plantingWeek: 10,
+        expectedHarvestWeek: 36,
+        daysToHarvest: 210,
+        expectedPricePerKg: 118.0,
+        expectedYieldKg: Math.round(210 * landSizeRopani),
+        expectedRevenue: Math.round(118.0 * 210 * landSizeRopani),
+        expectedProfit: Math.round((118.0 * 210 - 9500) * landSizeRopani),
+        inputCost: Math.round(9500 * landSizeRopani),
+        riskScore: 3.4,
+        riskLevel: 'low',
+        confidencePct: 89.0,
+        compositeScore: 8.52,
+        sharpeRatio: 1.92,
+        marketOutlook: 'Strong domestic spice demand and export clearance via Kakarbhitta/Butwal corridors.',
+        keyRisks: 'Rhizome rot during heavy rains',
+        mitigation: 'Raised beds with mulching and Trichoderma seed treatment.',
+      },
+      {
+        ...recommendations.chitwan[3],
+        rank: 4,
+        expectedYieldKg: Math.round(recommendations.chitwan[3].expectedYieldKg * (landSizeRopani / 5.0)),
+        expectedRevenue: Math.round(recommendations.chitwan[3].expectedRevenue * (landSizeRopani / 5.0)),
+        expectedProfit: Math.round(recommendations.chitwan[3].expectedProfit * (landSizeRopani / 5.0)),
+        inputCost: Math.round(recommendations.chitwan[3].inputCost * (landSizeRopani / 5.0)),
+      },
+    ];
+    return hillList;
+  }
 
   const defaultList = recommendations.chitwan.map((item, idx) => ({
     ...item,

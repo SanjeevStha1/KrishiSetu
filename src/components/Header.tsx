@@ -18,6 +18,7 @@ import { AuthUser, UserProfile } from '../types/krishi';
 import { InAppMessageService } from '../services/inAppMessageService';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import { DistrictWeatherWidget } from './DistrictWeatherWidget';
 
 export type AppTab = 
   | 'home' 
@@ -54,8 +55,8 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
-  selectedDistrict: _selectedDistrict,
-  setSelectedDistrict: _setSelectedDistrict,
+  selectedDistrict,
+  setSelectedDistrict,
   onRefresh,
   isRefreshing = false,
   authUser,
@@ -103,6 +104,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Right: Mandi Sync + Notifications + Settings + Profile */}
         <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Live Microclimate Temperature & Humidity Pill */}
+          <div className="hidden sm:flex items-center">
+            <DistrictWeatherWidget selectedDistrict={selectedDistrict || 'chitwan'} compact={true} />
+          </div>
+
           {/* Aesthetic Light / Dark Mode Switch */}
           <button
             type="button"

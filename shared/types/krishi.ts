@@ -99,6 +99,7 @@ export interface FarmRecordItem {
   cropName: string;
   record_type: 'revenue' | 'expense' | 'harvest' | 'yield';
   category: string;
+  categoryLabel?: string;
   amount: number;
   source: 'manual' | 'calculator' | 'sell_pool' | 'harvest_log' | 'marketplace' | 'ai_simulation';
   quantityKg?: number;

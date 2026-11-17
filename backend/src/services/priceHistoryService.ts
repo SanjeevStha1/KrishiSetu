@@ -19,9 +19,26 @@ export interface ComputedForecast {
   fiveMonthForecast: number;
 }
 
+const TRACKED_CROPS = [
+  'tomato', 'potato', 'onion', 'cauliflower', 'cabbage', 'carrot',
+  'capsicum', 'beans', 'peas', 'bitter_gourd', 'bottle_gourd', 'brinjal',
+  'chilli', 'coriander', 'cucumber', 'garlic', 'ginger', 'ladies_finger',
+  'mushroom', 'pumpkin', 'radish', 'spinach', 'sweet_potato',
+];
+
+const EXTRA_FALLBACK_RATES: Record<string, { current: number; min: number; max: number }> = {
+  capsicum: { current: 68, min: 55, max: 82 },
+  sweet_potato: { current: 48, min: 40, max: 58 },
+};
+
 export class PriceHistoryService {
   private static records: Map<string, PriceRecord> = new Map(); // key: `${cropId}:${date}`
   private static isInitialized = false;
+
+  private static normalizeCropKey(cropId: string): string {
+    const clean = (cropId || '').toLowerCase().trim();
+    return clean === 'green_chilli' ? 'chilli' : clean;
+  }
 
   private static getStorageFilePath(): string {
     const dataDir = path.join(process.cwd(), 'backend', 'src', 'data');
@@ -42,76 +59,70 @@ export class PriceHistoryService {
     if (this.isInitialized) return;
     this.isInitialized = true;
     this.loadFromDisk();
-    this.seedRealisticHistoryIfSparse();
+    this.seedHistoryFromKalimatiDatasetIfSparse();
   }
 
   /**
-   * Seeds historical daily records leading up to yesterdayPrice if history is sparse
+   * Seeds realistic historical daily records grounded in the 2020-2026 Kalimati dataset
+   * across all 23 tracked crops when local disk history has < 7 days for a crop.
    */
-  private static seedRealisticHistoryIfSparse(): void {
-    // Check if any crop has fewer than 7 days
-    const crops = ['tomato', 'potato', 'cauliflower', 'cabbage', 'onion', 'green_chilli'];
-    const baselineRates: Record<string, { yesterday: number; current: number; min: number; max: number }> = {
-      tomato: { yesterday: 53, current: 41, min: 35, max: 45 },
-      potato: { yesterday: 32, current: 52, min: 50, max: 54 },
-      cauliflower: { yesterday: 65, current: 95, min: 90, max: 100 },
-      cabbage: { yesterday: 47, current: 25, min: 20, max: 30 },
-      onion: { yesterday: 44, current: 95, min: 93, max: 97 },
-      green_chilli: { yesterday: 167, current: 65, min: 60, max: 70 },
-    };
-
+  private static seedHistoryFromKalimatiDatasetIfSparse(): void {
     let needsSave = false;
     const now = new Date();
+    const currentMonthIdx = now.getMonth();
 
-    for (const cropId of crops) {
+    for (const cropId of TRACKED_CROPS) {
       const existing = this.getHistory(cropId);
       if (existing.length < 7) {
-        const info = baselineRates[cropId];
-        if (!info) continue;
+        const datasetCrop = getKalimatiCrop(cropId);
+        const monthSeason = datasetCrop?.monthlySeasonality?.[currentMonthIdx];
+        const prevMonthIdx = (currentMonthIdx + 11) % 12;
+        const prevSeason = datasetCrop?.monthlySeasonality?.[prevMonthIdx];
 
-        // Ensure past 14 days up to yesterday
+        const extra = EXTRA_FALLBACK_RATES[cropId];
+        const currentAnchor = monthSeason
+          ? Math.round(monthSeason.avgPriceNPR)
+          : (extra?.current || 55);
+        const prevAnchor = prevSeason
+          ? Math.round(prevSeason.avgPriceNPR)
+          : Math.round(currentAnchor * 0.96);
+
+        const spreadHalf = monthSeason
+          ? Math.max(3, Math.round((monthSeason.p75NPR - monthSeason.p25NPR) * 0.25))
+          : Math.max(4, Math.round(currentAnchor * 0.1));
+
         for (let i = 14; i >= 1; i--) {
           const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
           const dateStr = d.toISOString().split('T')[0];
           const key = `${cropId}:${dateStr}`;
 
           if (!this.records.has(key)) {
-            // Smoothly bridge from benchmark towards yesterday's price
-            let price: number;
-            if (i === 1) {
-              // Yesterday exactly equals yesterday's recorded rate
-              price = info.yesterday;
-            } else {
-              // Drift leading up to yesterday
-              const step = (14 - i) / 13;
-              const baseAnchor = Math.round(info.yesterday * (0.92 + (cropId === 'onion' || cropId === 'green_chilli' ? 0.05 : 0.02)));
-              price = Math.round(baseAnchor + (info.yesterday - baseAnchor) * step + Math.sin(i * 0.7) * (info.yesterday * 0.04));
-            }
-            price = Math.max(8, price);
+            const step = (14 - i) / 13;
+            const seasonalWave = Math.sin(i * 0.65) * Math.min(spreadHalf * 0.45, currentAnchor * 0.05);
+            const price = Math.max(10, Math.round(prevAnchor + (currentAnchor - prevAnchor) * step + seasonalWave));
 
             this.records.set(key, {
               cropId,
               date: dateStr,
               price,
-              minPrice: Math.round(price * 0.92),
-              maxPrice: Math.round(price * 1.08),
-              source: i === 1 ? 'live' : 'fallback',
+              minPrice: Math.max(8, price - spreadHalf),
+              maxPrice: price + spreadHalf,
+              source: 'fallback',
             });
             needsSave = true;
           }
         }
 
-        // Today's date check
         const todayStr = now.toISOString().split('T')[0];
         const todayKey = `${cropId}:${todayStr}`;
         if (!this.records.has(todayKey)) {
           this.records.set(todayKey, {
             cropId,
             date: todayStr,
-            price: info.current,
-            minPrice: info.min,
-            maxPrice: info.max,
-            source: 'live',
+            price: currentAnchor,
+            minPrice: extra?.min || Math.max(8, currentAnchor - spreadHalf),
+            maxPrice: extra?.max || currentAnchor + spreadHalf,
+            source: 'fallback',
           });
           needsSave = true;
         }
@@ -146,9 +157,10 @@ export class PriceHistoryService {
       this.records.clear();
       for (const item of list) {
         if (item && item.cropId && item.date && typeof item.price === 'number') {
-          const key = `${item.cropId.toLowerCase()}:${item.date}`;
+          const normId = this.normalizeCropKey(item.cropId);
+          const key = `${normId}:${item.date}`;
           this.records.set(key, {
-            cropId: item.cropId.toLowerCase(),
+            cropId: normId,
             date: item.date,
             price: Number(item.price),
             minPrice: typeof item.minPrice === 'number' ? item.minPrice : undefined,
@@ -181,11 +193,10 @@ export class PriceHistoryService {
 
   /**
    * Saves a single price record with duplicate protection.
-   * Overwrites/updates if cropId + date already exists.
    */
   public static saveRecord(record: PriceRecord): void {
     this.init();
-    const cleanCropId = record.cropId.toLowerCase().trim();
+    const cleanCropId = this.normalizeCropKey(record.cropId);
     const key = `${cleanCropId}:${record.date}`;
 
     this.records.set(key, {
@@ -206,7 +217,7 @@ export class PriceHistoryService {
   public static saveRecords(records: PriceRecord[]): void {
     this.init();
     for (const record of records) {
-      const cleanCropId = record.cropId.toLowerCase().trim();
+      const cleanCropId = this.normalizeCropKey(record.cropId);
       const key = `${cleanCropId}:${record.date}`;
       this.records.set(key, {
         cropId: cleanCropId,
@@ -221,13 +232,11 @@ export class PriceHistoryService {
   }
 
   /**
-   * Retrieves historical records for a specific crop.
-   * Returns records sorted chronologically: oldest -> newest.
-   * If days is provided, limits to the most recent N points.
+   * Retrieves historical records for a specific crop (oldest -> newest).
    */
   public static getHistory(cropId: string, days?: number): PriceRecord[] {
     this.init();
-    const targetCrop = cropId.toLowerCase().trim();
+    const targetCrop = this.normalizeCropKey(cropId);
     const matched: PriceRecord[] = [];
 
     for (const rec of this.records.values()) {
@@ -236,20 +245,15 @@ export class PriceHistoryService {
       }
     }
 
-    // Sort oldest -> newest (chronological order)
     matched.sort((a, b) => a.date.localeCompare(b.date));
 
     if (typeof days === 'number' && days > 0) {
       return matched.slice(-days);
     }
 
-    // Sensible default of 30 days
     return matched.slice(-30);
   }
 
-  /**
-   * Returns all recorded dates for a crop
-   */
   public static getHistoryCount(cropId?: string): number {
     this.init();
     if (!cropId) return this.records.size;
@@ -257,8 +261,7 @@ export class PriceHistoryService {
   }
 
   /**
-   * Computes deterministic forecasts for a crop based on recorded price history.
-   * Safely falls back if insufficient data without inventing random numbers.
+   * Computes deterministic econometric + seasonal forecasts grounded in 6-year Kalimati dataset
    */
   public static computeForecast(
     cropId: string,
@@ -273,12 +276,12 @@ export class PriceHistoryService {
     }
   ): ComputedForecast {
     this.init();
-    const history = this.getHistory(cropId);
+    const normCropId = this.normalizeCropKey(cropId);
+    const history = this.getHistory(normCropId);
     const cur = (typeof currentPrice === 'number' && currentPrice > 0)
       ? currentPrice
       : (history.length > 0 ? history[history.length - 1].price : (baselineSeed?.currentPrice || 50));
 
-    // Fallback if no baseline seed and no history
     if (!baselineSeed && history.length === 0) {
       const safeCur = Math.max(1, Math.round(cur));
       return {
@@ -290,8 +293,6 @@ export class PriceHistoryService {
       };
     }
 
-    // Case 1: Insufficient history (< 2 data points)
-    // Scale baseline seed proportionally to current real price, with bounded ratio
     if (history.length < 2 && baselineSeed) {
       const basePrice = baselineSeed.currentPrice > 0 ? baselineSeed.currentPrice : cur;
       const rawRatio = cur / basePrice;
@@ -306,8 +307,6 @@ export class PriceHistoryService {
       };
     }
 
-    // Case 2: >= 2 historical data points
-    // Calculate empirical trend/slope via linear regression over available points
     const n = history.length;
     let sumX = 0;
     let sumY = 0;
@@ -326,34 +325,33 @@ export class PriceHistoryService {
     const denom = n * sumXX - sumX * sumX;
     const rawSlope = denom !== 0 ? (n * sumXY - sumX * sumY) / denom : 0;
 
-    // Bound daily slope to max 3% of current price to avoid unrealistic jumps
     const maxDailyChange = cur * 0.03;
     const slope = Math.max(-maxDailyChange, Math.min(maxDailyChange, isFinite(rawSlope) ? rawSlope : 0));
 
-    // Dampened short-to-medium horizon projections
-    const f7 = Math.max(1, Math.round(cur + slope * 7 * 0.85));
-    const f14 = Math.max(1, Math.round(cur + slope * 14 * 0.70));
-    const f30 = Math.max(1, Math.round(cur + slope * 30 * 0.50));
+    let f7 = Math.max(1, Math.round(cur + slope * 7 * 0.85));
+    let f14 = Math.max(1, Math.round(cur + slope * 14 * 0.70));
+    let f30 = Math.max(1, Math.round(cur + slope * 30 * 0.50));
 
-    // Long-horizon projections (3-month & 5-month):
-    // Incorporate seasonal cyclical behavior from Kalimati dataset if available
     let f3m = f30;
     let f5m = f30;
 
-    const cropSeasonal = getKalimatiCrop(cropId);
+    const cropSeasonal = getKalimatiCrop(normCropId);
     if (cropSeasonal && cropSeasonal.monthlySeasonality && cropSeasonal.monthlySeasonality.length === 12) {
-      const currentMonthIdx = new Date().getMonth(); // 0 to 11
+      const currentMonthIdx = new Date().getMonth();
+      const nextMonthIdx = (currentMonthIdx + 1) % 12;
       const m3Idx = (currentMonthIdx + 3) % 12;
       const m5Idx = (currentMonthIdx + 5) % 12;
 
       const currentSeasonalAvg = cropSeasonal.monthlySeasonality[currentMonthIdx]?.avgPriceNPR || cur;
+      const nextSeasonalAvg = cropSeasonal.monthlySeasonality[nextMonthIdx]?.avgPriceNPR || currentSeasonalAvg;
       const m3SeasonalAvg = cropSeasonal.monthlySeasonality[m3Idx]?.avgPriceNPR || currentSeasonalAvg;
       const m5SeasonalAvg = cropSeasonal.monthlySeasonality[m5Idx]?.avgPriceNPR || currentSeasonalAvg;
 
+      const s1Multiplier = currentSeasonalAvg > 0 ? nextSeasonalAvg / currentSeasonalAvg : 1;
       const s3Multiplier = currentSeasonalAvg > 0 ? m3SeasonalAvg / currentSeasonalAvg : 1;
       const s5Multiplier = currentSeasonalAvg > 0 ? m5SeasonalAvg / currentSeasonalAvg : 1;
 
-      // Blend 60% seasonal cyclical pattern with 40% recent price level
+      f30 = Math.max(1, Math.round(f30 * 0.65 + (cur * s1Multiplier) * 0.35));
       f3m = Math.max(1, Math.round(cur * 0.4 + cur * s3Multiplier * 0.6));
       f5m = Math.max(1, Math.round(cur * 0.4 + cur * s5Multiplier * 0.6));
     } else if (baselineSeed) {
